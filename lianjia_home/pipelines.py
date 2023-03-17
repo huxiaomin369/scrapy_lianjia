@@ -3,6 +3,7 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 import re
+import MySQLdb
 from scrapy.exceptions import DropItem
 
 # useful for handling different item types with a single interface
@@ -19,10 +20,58 @@ class FilterPipeline(object):
         item['total_area'] = re.findall(r'\d+\.?\d*', item['total_area'])[0]
         item['unit_price'] = re.findall(r'\d+,?\d*', item['unit_price'])[0].replace(",", '')
         for key, value in item.items():
-            item[key] = value.strip()
+            if item[key] is not None:
+                item[key] = value.strip()
         # if item['direction'] == '暂时无数据':
         #     raise DropItem(f'无朝向数据，抛弃此项目{item}')
         return item
+
+
+class MySQLPipeLine(object):
+    db_conn = None
+    db_cursor = None
+    def open_spider(self, spider):
+        db_name = spider.settings.get('MYSQL_DB_NAME')
+        host = spider.settings.get('MYSQL_HOST')
+        user = spider.settings.get('MYSQL_USER')
+        pwd = spider.settings.get('MYSQL_PASSWORD')
+        self.db_conn = MySQLdb.connect(db=db_name, host=host, user=user,
+                                       password=pwd, charset='utf8')
+        self.db_cursor = self.db_conn.cursor()
+
+    def process_item(self, item, spider):
+        house_id = item['house_id']
+        title = item['title']
+        house_struct = item['house_struct']
+        floor_info = item['floor_info'].split('(')[0]
+        total_floor = re.findall(r'\d+', item['floor_info'])[0]
+        direction = item['direction']
+        total_area = item['total_area']
+        village_name = item['village_name']
+        district = item['district']
+        region = item['region']
+        fitment = item['fitment']
+        elevator_rate = item['elevator_rate']
+        start_time = item['start_time']
+        house_usage = item['house_usage']
+        house_property = item['house_property']
+        total_price = item['total_price']
+        unit_price = item['unit_price']
+        mortgage_info = item['mortgage_info']
+        values = (house_id, title, house_struct, floor_info, total_floor,direction,
+                  total_area,village_name,district,region,fitment,elevator_rate,
+                  start_time,house_usage,house_property,total_price,unit_price,mortgage_info)
+        sql = 'insert into lianjia_nc (house_id, title, house_struct, floor_info, total_floor,direction,\
+                  total_area,village_name,district,region,fitment,elevator_rate,\
+                  start_time,house_usage,house_property,total_price,unit_price,mortgage_info)' \
+              ' values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+        self.db_cursor.execute(sql, values)
+        return item
+
+    def close_spider(self, spider):
+        self.db_conn.commit()
+        self.db_cursor.close()
+        self.db_conn.close()
 
 
 class CSVPipeline(object):

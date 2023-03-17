@@ -13,6 +13,10 @@ SPIDER_MODULES = ['lianjia_home.spiders']
 NEWSPIDER_MODULE = 'lianjia_home.spiders'
 
 SAVE_FILE_NAME = 'house_ifo.csv'
+MYSQL_DB_NAME = 'house'
+MYSQL_HOST = 'localhost'
+MYSQL_PASSWORD = '971101'
+MYSQL_USER = 'root'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 USER_AGENT = "Mozilla/5.0 \
@@ -69,7 +73,8 @@ ROBOTSTXT_OBEY = False
 ITEM_PIPELINES = {
     # 'lianjia_home.pipelines.LianjiaHomePipeline': 300,
     'lianjia_home.pipelines.FilterPipeline': 100,
-    'lianjia_home.pipelines.CSVPipeline': 200,
+    # 'lianjia_home.pipelines.CSVPipeline': 200,
+    'lianjia_home.pipelines.MySQLPipeLine': 400,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
