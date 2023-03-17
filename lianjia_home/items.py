@@ -14,13 +14,14 @@ class LianjiaHomeItem(scrapy.Item):
     direction = scrapy.Field()#朝向
     total_area = scrapy.Field()
     village_name = scrapy.Field()#小区名
-    region = scrapy.Field()#区县
-    buiding_type = scrapy.Field()#建筑结构
+    district = scrapy.Field()#区
+    region = scrapy.Field()#地区
+    building_type = scrapy.Field()#建筑结构
     fitment = scrapy.Field()#装修信息
     elevator_rate = scrapy.Field()#梯户比例
     start_time = scrapy.Field()#上架时间
     house_usage = scrapy.Field()#房屋用途（住宅？）
-    property = scrapy.Field()#产权信息
+    house_property = scrapy.Field()#产权信息
     total_price = scrapy.Field()#总价
     unit_price = scrapy.Field()#单价
     mortgage_info = scrapy.Field() #抵押信息
