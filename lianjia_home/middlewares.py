@@ -4,10 +4,17 @@
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
+from scrapy.downloadermiddlewares.useragent import UserAgentMiddleware
+from fake_useragent import UserAgent
 
 # useful for handling different item types with a single interface
 from itemadapter import is_item, ItemAdapter
 
+class LianjiaHomeUserAgentMiddleware(UserAgentMiddleware):
+    def process_request(self, request, spider):
+        ua = UserAgent()
+        request.headers['User-Agent'] = ua.random
+        # print(request.headers['User-Agent'])
 
 class LianjiaHomeSpiderMiddleware:
     # Not all methods need to be defined. If a method is not defined,

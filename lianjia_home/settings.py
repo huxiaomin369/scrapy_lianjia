@@ -19,10 +19,10 @@ MYSQL_PASSWORD = '971101'
 MYSQL_USER = 'root'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENT = "Mozilla/5.0 \
-            (Windows NT 10.0; Win64; x64)  \
-            AppleWebKit/537.36 (KHTML, like Gecko) \
-            Chrome/110.0.0.0 Safari/537.36 Edg/110.0.1587.69"
+# USER_AGENT = "Mozilla/5.0 \
+#             (Windows NT 10.0; Win64; x64)  \
+#             AppleWebKit/537.36 (KHTML, like Gecko) \
+#             Chrome/110.0.0.0 Safari/537.36 Edg/110.0.1587.69"
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
@@ -33,7 +33,8 @@ ROBOTSTXT_OBEY = False
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-#DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 1
+RANDOMIZE_DOWNLOAD_DELAY = True
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
 #CONCURRENT_REQUESTS_PER_IP = 16
@@ -58,9 +59,10 @@ ROBOTSTXT_OBEY = False
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-#DOWNLOADER_MIDDLEWARES = {
-#    'lianjia_home.middlewares.LianjiaHomeDownloaderMiddleware': 543,
-#}
+DOWNLOADER_MIDDLEWARES = {
+    'lianjia_home.middlewares.LianjiaHomeDownloaderMiddleware': None,
+    'lianjia_home.middlewares.LianjiaHomeUserAgentMiddleware': 100,
+}
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html

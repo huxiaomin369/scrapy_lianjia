@@ -51,7 +51,7 @@ class LianjiaHomeSpider(scrapy.Spider):
             page_info = response.xpath("//div[@class='page-box house-lst-page-box']/@page-data")
             page_data = json.loads(page_info[0].extract())
             self.total_page = int(page_data['totalPage'])
-            self.total_page = 3
+            # self.total_page = 3
         self.current_page += 1
         if self.current_page <= self.total_page:
             next_url = f"https://nc.lianjia.com/ershoufang/pg{self.current_page}co32/"
