@@ -1,7 +1,9 @@
+import redis
 import scrapy
 from scrapy import Request
 from scrapy.spiders import Spider
 from lianjia_home.items import LianjiaHomeItem
+from lianjia_home import settings
 from scrapy.loader import ItemLoader
 import json
 
@@ -13,10 +15,26 @@ class LianjiaHomeSpider(scrapy.Spider):
     def __init__(self):
         self.total_page = None
         self.current_page = 1
+        host = settings.REDIS_HOST
+        port = settings.REDIS_PORT
+        db_index = settings.REDIS_DB_INDEX
+        db_psd = settings.REDIS_PASSWORD
+        self.db_conn = redis.StrictRedis(host=host,
+                                         port=port,
+                                         password=db_psd,
+                                         decode_responses=True)
 
     def start_requests(self):
         url = 'https://nc.lianjia.com/ershoufang/co32/'
-        yield Request(url)
+        proxy = self.db_conn.srandmember('ip')
+        self.logger.info(f"use proxy {proxy}")
+        yield Request(url,
+                      callback=self.parse,
+                      errback=self.error_back,
+                      meta={
+                          'proxy': proxy,
+                          'download_timeout': 10,
+                      })
 
     def parse(self, response):
         list_selector = response.xpath("//div[@class='info clear']")
@@ -55,7 +73,14 @@ class LianjiaHomeSpider(scrapy.Spider):
         self.current_page += 1
         if self.current_page <= self.total_page:
             next_url = f"https://nc.lianjia.com/ershoufang/pg{self.current_page}co32/"
-            yield Request(next_url)
+            proxy = self.db_conn.srandmember('ip')
+            yield Request(next_url,
+                          callback=self.parse,
+                          errback=self.error_back,
+                          meta={
+                              'proxy': proxy,
+                              'download_timeout': 10,
+                          })
 
     def detail_parase(self, response):
         house_detail_selector = response.xpath("//div[@class='introContent']")[0]
@@ -71,5 +96,20 @@ class LianjiaHomeSpider(scrapy.Spider):
         item['mortgage_info'] = house_detail_selector.xpath("//div[@class='transaction']/div[2]/ul/li[7]/span[2]/text()").extract_first()
         item['house_id'] = response.xpath("//div[@class='aroundInfo']/div[@class='houseRecord']/span[2]/text()").extract_first()
         yield item
+
+    def error_back(self, failure):
+        self.logger.error(repr(failure))
+        request = failure.request
+        self.db_conn.srem("ip", request.meta['proxy'].upper())
+        proxy = self.db_conn.srandmember('ip')
+        self.logger.info(f'reuse proxy{proxy}')
+        yield Request(request.url,
+                      callback=self.parse,
+                      errback=self.error_back,
+                      meta={
+                          'proxy' : proxy,
+                          'download_timeout' : 10,
+                      })
+
 
 

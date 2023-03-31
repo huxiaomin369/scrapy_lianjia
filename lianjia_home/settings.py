@@ -18,6 +18,11 @@ MYSQL_HOST = 'localhost'
 MYSQL_PASSWORD = '971101'
 MYSQL_USER = 'root'
 
+REDIS_HOST = "localhost"#主机地址
+REDIS_PORT = 6379        #端口
+REDIS_DB_INDEX = 0       #索引
+REDIS_PASSWORD = ""#密码
+
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = "Mozilla/5.0 \
 #             (Windows NT 10.0; Win64; x64)  \
@@ -74,6 +79,7 @@ DOWNLOADER_MIDDLEWARES = {
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     # 'lianjia_home.pipelines.LianjiaHomePipeline': 300,
+    'lianjia_home.pipelines.FreeProxyPipeline': 50,
     'lianjia_home.pipelines.FilterPipeline': 100,
     # 'lianjia_home.pipelines.CSVPipeline': 200,
     'lianjia_home.pipelines.MySQLPipeLine': 400,

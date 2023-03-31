@@ -6,6 +6,10 @@
 import scrapy
 
 
+class FreeProxyItem(scrapy.Item):
+    url = scrapy.Field()#url
+    cryptonym = scrapy.Field()#是否高匿名
+
 class LianjiaHomeItem(scrapy.Item):
     # define the fields for your item here like:
     title = scrapy.Field()
