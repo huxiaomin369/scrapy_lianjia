@@ -36,7 +36,10 @@ class LianjiaHomeSpider(scrapy.Spider):
                           meta={
                               'proxy': proxy,
                               'download_timeout': 10,
-                          })
+                              "dont_retry": True,  # 请求不重试
+                          },
+                          dont_filter=True,  # 不过滤重复请求
+                          )
         else:
             yield Request(url)
 
@@ -71,7 +74,7 @@ class LianjiaHomeSpider(scrapy.Spider):
                 print('Error:', e)
         if self.current_page == 1:
             page_info = response.xpath("//div[@class='page-box house-lst-page-box']/@page-data")
-            page_data = json.loads(page_info[0].extract())
+            page_data = json.loads(page_info.extract_first())
             self.total_page = int(page_data['totalPage'])
             # self.total_page = 3
         self.current_page += 1
@@ -85,12 +88,15 @@ class LianjiaHomeSpider(scrapy.Spider):
                               meta={
                                   'proxy': proxy,
                                   'download_timeout': 10,
-                              })
+                                  "dont_retry": True,  # 请求不重试
+                              },
+                              dont_filter=True,  # 不过滤重复请求
+                              )
             else:
                 yield Request(next_url)
 
     def detail_parase(self, response):
-        house_detail_selector = response.xpath("//div[@class='introContent']")[0]
+        house_detail_selector = response.xpath("//div[@class='introContent']").extract_first()
         item: LianjiaHomeItem = response.meta["item"]
         item['village_name'] = response.xpath("//div[@class='communityName']/a[1]/text()").extract_first()
         item['district'] = response.xpath("//div[@class='areaName']/span[2]/a[1]/text()").extract_first()
@@ -114,9 +120,12 @@ class LianjiaHomeSpider(scrapy.Spider):
                       callback=self.parse,
                       errback=self.error_back,
                       meta={
-                          'proxy' : proxy,
-                          'download_timeout' : 10,
-                      })
+                          'proxy': proxy,
+                          'download_timeout': 10,
+                          "dont_retry": True,  # 请求不重试
+                      },
+                      dont_filter=True,  # 不过滤重复请求
+                      )
 
 
 

@@ -15,31 +15,38 @@ class LianjiaHomePipeline:
     def process_item(self, item, spider):
         return item
 
+
 class FreeProxyPipeline(object):
-    #Spider开启时，获取数据库配置信息，连接redis数据库服务器
-    def open_spider(self,spider):
+    # Spider开启时，获取数据库配置信息，连接redis数据库服务器
+    def __init__(self):
+        self.db_conn = None
+
+    def open_spider(self, spider):
         if spider.name == "free_proxy_05":
-            #获取配置文件中redis配置信息
-            host = spider.settings.get("REDIS_HOST")#主机地址
-            port = spider.settings.get("REDIS_PORT",)#端口
-            db_index = spider.settings.get("REDIS_DB_INDEX")#索引
-            db_psd = spider.settings.get("REDIS_PASSWORD")#密码
-            #连接redis，得到一个连接对象
-            self.db_conn = redis.StrictRedis(host=host,port=port,db=db_index,
-                                             password=db_psd,decode_responses=True)
+            # 获取配置文件中redis配置信息
+            host = spider.settings.get("REDIS_HOST")  # 主机地址
+            port = spider.settings.get("REDIS_PORT", )  # 端口
+            db_index = spider.settings.get("REDIS_DB_INDEX")  # 索引
+            db_psd = spider.settings.get("REDIS_PASSWORD")  # 密码
+            # 连接redis，得到一个连接对象
+            self.db_conn = redis.StrictRedis(host=host, port=port, db=db_index,
+                                             password=db_psd, decode_responses=True)
             self.db_conn.delete("ip")
 
-    #将数据存储于redis数据库
+    # 将数据存储于redis数据库
     def process_item(self, item, spider):
         if spider.name == "free_proxy_05":
-            #将item转换为字典类型
+            # 将item转换为字典类型
             item_dict = dict(item)
-            #将item_dict保存于key为ip的集合中
-            self.db_conn.sadd("ip",item_dict["url"])
+            # 将item_dict保存于key为ip的集合中
+            self.db_conn.sadd("ip", item_dict["url"])
         return item
 
     def close_spider(self, spider):
-        self.db_conn.connection_pool.disconnect()
+        if self.db_conn:
+            self.db_conn.connection_pool.disconnect()
+            self.db_conn.close()
+
 
 class FilterPipeline(object):
     def process_item(self, item, spider):
@@ -58,6 +65,7 @@ class FilterPipeline(object):
 class MySQLPipeLine(object):
     db_conn = None
     db_cursor = None
+
     def open_spider(self, spider):
         db_name = spider.settings.get('MYSQL_DB_NAME')
         host = spider.settings.get('MYSQL_HOST')
@@ -88,9 +96,9 @@ class MySQLPipeLine(object):
         total_price = item['total_price']
         unit_price = item['unit_price']
         mortgage_info = item['mortgage_info']
-        values = (house_id, title, house_struct, floor_info, total_floor,direction,
-                  total_area,village_name,district,region,fitment,elevator_rate,
-                  start_time,house_usage,house_property,total_price,unit_price,mortgage_info)
+        values = (house_id, title, house_struct, floor_info, total_floor, direction,
+                  total_area, village_name, district, region, fitment, elevator_rate,
+                  start_time, house_usage, house_property, total_price, unit_price, mortgage_info)
         sql = 'insert into lianjia_nc (house_id, title, house_struct, floor_info, total_floor,direction,\
                   total_area,village_name,district,region,fitment,elevator_rate,\
                   start_time,house_usage,house_property,total_price,unit_price,mortgage_info)' \
