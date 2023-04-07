@@ -16,7 +16,6 @@ class LianjiaHomePipeline:
         return item
 
 class FreeProxyPipeline(object):
-    db_conn = None
     #Spider开启时，获取数据库配置信息，连接redis数据库服务器
     def open_spider(self,spider):
         if spider.name == "free_proxy_05":

@@ -12,7 +12,7 @@ class FreeProxy05Spider(scrapy.Spider):
     max_page = 10
 
     def __init__(self):
-        self.test_url = 'http://www.baidu.com'
+        self.test_url = 'https://nc.lianjia.com/ershoufang/co32/'
 
     def parse(self, response):
         if response.url.find('seofangfa') != -1:
