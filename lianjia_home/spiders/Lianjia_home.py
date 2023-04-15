@@ -159,14 +159,12 @@ class LianjiaHomeSpider(scrapy.Spider):
             self.db_conn.srem("ip", odlRequest.meta['proxy'])
         proxy = self.db_conn.srandmember('ip')
         self.logger.info(f'reuse proxy{proxy}')
+        meta = odlRequest.meta
+        meta['proxy'] = proxy
         return Request(odlRequest.url,
                       callback=callbackFunc,
                       errback=errobackFunc,
-                      meta={
-                          'proxy': proxy,
-                          'download_timeout': 10,
-                          "dont_retry": True,  # 请求不重试
-                      },
+                      meta=meta,
                       dont_filter=True,  # 不过滤重复请求
                       )
 
