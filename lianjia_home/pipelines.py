@@ -5,6 +5,7 @@
 import re
 import MySQLdb
 import redis
+import datetime
 from scrapy.exceptions import DropItem
 
 # useful for handling different item types with a single interface
@@ -31,7 +32,7 @@ class FreeProxyPipeline(object):
             # 连接redis，得到一个连接对象
             self.db_conn = redis.StrictRedis(host=host, port=port, db=db_index,
                                              password=db_psd, decode_responses=True)
-            self.db_conn.delete("ip")
+            # self.db_conn.delete("ip")
 
     # 将数据存储于redis数据库
     def process_item(self, item, spider):
@@ -57,8 +58,10 @@ class FilterPipeline(object):
         for key, value in item.items():
             if item[key] is not None:
                 item[key] = value.strip()
-        # if item['direction'] == '暂时无数据':
-        #     raise DropItem(f'无朝向数据，抛弃此项目{item}')
+        # 按挂牌日期过滤
+        # start_datetime = datetime.datetime.strptime(item['start_time'], '%Y-%m-%d')
+        # if start_datetime < datetime.datetime(2022, 11, 1):
+        #     raise DropItem(f'日期过早，抛弃此项目:{item}')
         return item
 
 
