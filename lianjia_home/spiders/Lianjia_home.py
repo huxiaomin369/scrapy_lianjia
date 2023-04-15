@@ -29,6 +29,7 @@ class LianjiaHomeSpider(scrapy.Spider):
 
     def __init__(self):
         self.use_proxy = settings.USE_PROXY
+        self.crawl_with_district = settings.CRAWL_WITH_DISTRICT
         host = settings.REDIS_HOST
         port = settings.REDIS_PORT
         db_index = settings.REDIS_DB_INDEX
@@ -39,24 +40,34 @@ class LianjiaHomeSpider(scrapy.Spider):
                                          decode_responses=True)
 
     def start_requests(self):
+        if self.crawl_with_district:
+            for key in districtDic.keys():
+                url = f'https://nc.lianjia.com/ershoufang/{key}/co32/'
+                yield self.my_request(url, self.parse, self.error_back)
+        else:
+            url = 'https://nc.lianjia.com/ershoufang/co32/'
+            yield self.my_request(url, self.parse, self.error_back)
 
-        for key in districtDic.keys():
-            url = f'https://nc.lianjia.com/ershoufang/{key}/co32/'
-            if self.use_proxy:
-                proxy = self.db_conn.srandmember('ip')
-                self.logger.info(f"use proxy {proxy}")
-                yield Request(url,
-                              callback=self.parse,
-                              errback=self.error_back,
-                              meta={
-                                  'proxy': proxy,
-                                  'download_timeout': 10,
-                                  "dont_retry": True,  # 请求不重试
-                              },
-                              dont_filter=True,  # 不过滤重复请求
-                              )
-            else:
-                yield Request(url)
+    def my_request(self, url, callback, errback, item=None):
+        if self.use_proxy:
+            proxy = self.db_conn.srandmember('ip')
+            self.logger.info(f"use proxy {proxy}")
+            meta = {
+                'proxy': proxy,
+                'download_timeout': 10,
+                "dont_retry": True,  # 请求不重试
+            }
+            if item:
+                meta['item'] = item
+            return Request(url,
+                          callback=callback,
+                          errback=errback,
+                          meta=meta,
+                          dont_filter=True,  # 不过滤重复请求
+                          )
+        else:
+            meta = {'item': item} if (item is not None) else None
+            return Request(url=url, callback=callback, meta=meta)
 
     def parse(self, response):
         list_selector = response.xpath("//div[@class='info clear']")
@@ -84,7 +95,7 @@ class LianjiaHomeSpider(scrapy.Spider):
                 item["total_price"] = total_price
                 item["unit_price"] = unit_price
                 detail_url = one_selector.xpath("div[@class='title']/a/@href").extract_first()
-                yield Request(detail_url, meta={'item' : item}, callback=self.detail_parase)
+                yield self.my_request(detail_url, self.detail_parase, self.detail_error_back, item=item)
             except Exception as e:
                 print('Error:', e)
 
@@ -104,25 +115,16 @@ class LianjiaHomeSpider(scrapy.Spider):
                 # raise Exception('None page Data find in xpath or url')
                 self.logger.info('None page Data find in xpath or url')
         if current_page < total_page: #获取下一页
-            try:
-                sub_district = response.url.split('/')[4]
-                next_url = f"https://nc.lianjia.com/ershoufang/{sub_district}/pg{current_page+1}co32/"
-                proxy = self.db_conn.srandmember('ip')
-                if self.use_proxy:
-                    yield Request(next_url,
-                                  callback=self.parse,
-                                  errback=self.error_back,
-                                  meta={
-                                      'proxy': proxy,
-                                      'download_timeout': 10,
-                                      "dont_retry": True,  # 请求不重试
-                                  },
-                                  dont_filter=True,  # 不过滤重复请求
-                                  )
-                else:
-                    yield Request(next_url)
-            except Exception as e:
-                self.logger.error(e)
+            if self.crawl_with_district:
+                try:
+                    sub_district = response.url.split('/')[4]
+                    next_url = f"https://nc.lianjia.com/ershoufang/{sub_district}/pg{current_page+1}co32/"
+                    yield self.my_request(next_url, self.parse, self.error_back)
+                except Exception as e:
+                    self.logger.error(e)
+            else:
+                next_url = f"https://nc.lianjia.com/ershoufang/pg{current_page+1}co32/"
+                yield self.my_request(next_url, self.parse, self.error_back)
 
     def detail_parase(self, response):
         item: LianjiaHomeItem = response.meta["item"]
@@ -145,13 +147,21 @@ class LianjiaHomeSpider(scrapy.Spider):
     def error_back(self, failure):
         self.logger.error(repr(failure))
         request = failure.request
-        if self.db_conn.sismember("ip", request.meta['proxy']):
-            self.db_conn.srem("ip", request.meta['proxy'])
+        yield self.re_request(request, self.parse, self.error_back)
+
+    def detail_error_back(self, failure):
+        self.logger.error(repr(failure))
+        request = failure.request
+        yield self.re_request(request, self.detail_parase, self.detail_error_back)
+
+    def re_request(self, odlRequest, callbackFunc, errobackFunc):
+        if self.db_conn.sismember("ip", odlRequest.meta['proxy']):
+            self.db_conn.srem("ip", odlRequest.meta['proxy'])
         proxy = self.db_conn.srandmember('ip')
         self.logger.info(f'reuse proxy{proxy}')
-        yield Request(request.url,
-                      callback=self.parse,
-                      errback=self.error_back,
+        return Request(odlRequest.url,
+                      callback=callbackFunc,
+                      errback=errobackFunc,
                       meta={
                           'proxy': proxy,
                           'download_timeout': 10,
