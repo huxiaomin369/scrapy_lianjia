@@ -99,13 +99,14 @@ class MySQLPipeLine(object):
         total_price = item['total_price']
         unit_price = item['unit_price']
         mortgage_info = item['mortgage_info']
+        url = item['url']
         values = (house_id, title, house_struct, floor_info, total_floor, direction,
                   total_area, village_name, district, region, fitment, elevator_rate,
-                  start_time, house_usage, house_property, total_price, unit_price, mortgage_info)
+                  start_time, house_usage, house_property, total_price, unit_price, mortgage_info, url)
         sql = 'insert into lianjia_nc (house_id, title, house_struct, floor_info, total_floor,direction,\
                   total_area,village_name,district,region,fitment,elevator_rate,\
-                  start_time,house_usage,house_property,total_price,unit_price,mortgage_info)' \
-              ' values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+                  start_time,house_usage,house_property,total_price,unit_price,mortgage_info,url)' \
+              ' values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
         self.db_cursor.execute(sql, values)
         return item
 

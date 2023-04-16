@@ -140,6 +140,7 @@ class LianjiaHomeSpider(scrapy.Spider):
             item['house_property'] = house_detail_selector.xpath("//div[@class='transaction']/div[2]/ul/li[6]/span[2]/text()").extract_first()
             item['mortgage_info'] = house_detail_selector.xpath("//div[@class='transaction']/div[2]/ul/li[7]/span[2]/text()").extract_first()
             item['house_id'] = response.xpath("//div[@class='aroundInfo']/div[@class='houseRecord']/span[2]/text()").extract_first()
+            item['url'] = response.url
         except Exception as e:
             self.logger.error(e)
         yield item

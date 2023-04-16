@@ -30,4 +30,5 @@ class LianjiaHomeItem(scrapy.Item):
     unit_price = scrapy.Field()#单价
     mortgage_info = scrapy.Field() #抵押信息
     house_id = scrapy.Field()
+    url = scrapy.Field()
 
