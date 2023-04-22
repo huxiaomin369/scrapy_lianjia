@@ -2,7 +2,7 @@ from scrapy.cmdline import execute
 from multiprocessing import  Process
 import os
 import time
-import sys
+import psutil
 
 class FreeProxyProcess(Process): 
     def __init__(self,name):
@@ -28,26 +28,37 @@ class LianjiaProcess(Process):
     def run(self):
         os.system("scrapy crawl Lianjia_home")
 
+def is_process_alive(pid):
+    try:
+        process = psutil.Process(pid)
+        if process.status() == psutil.STATUS_ZOMBIE:
+            return False
+        return True
+    except (psutil.NoSuchProcess, psutil.AccessDenied):
+        return False
+
 if __name__ == "__main__":
     # execute(['scrapy', 'crawl', 'free_proxy_05'])
     # execute(['scrapy', 'crawl', 'Lianjia_home'])
     freeProxy = FreeProxyProcess("freeProxy") 
     runRedis = RunRedis('runRedis')
     lianjiaHome = LianjiaProcess('lianjiaHome')
-    processList = [runRedis, freeProxy, lianjiaHome]
+    processList = [runRedis, freeProxy]
     for i in processList:
         i.start()
         time.sleep(5)
-    while lianjiaHome.is_alive():
-        if freeProxy.is_alive():
+    time.sleep(2*60) #延迟2分钟等数据库中有一定数量的代理
+    lianjiaHome.start()
+    processList.append(lianjiaHome)
+    while is_process_alive(lianjiaHome.pid):
+        if is_process_alive(freeProxy.pid):
             time.sleep(10*60)
-            freeProxy.run()
+            freeProxy.run() #每10分钟运行一次代理爬虫
     runRedis.terminate()
     freeProxy.terminate()
 
     for i in processList:
         i.join()
-
 
 
 
