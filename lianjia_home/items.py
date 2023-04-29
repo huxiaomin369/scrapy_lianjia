@@ -32,3 +32,17 @@ class LianjiaHomeItem(scrapy.Item):
     house_id = scrapy.Field()
     url = scrapy.Field()
 
+class LianjiaNCNewItem(scrapy.Item):
+    url = scrapy.Field()
+    village_name = scrapy.Field()#小区名
+    unit_price = scrapy.Field()#单价
+    district = scrapy.Field()#区
+    region = scrapy.Field()#地区
+    sale_date = scrapy.Field()#开盘时间
+    deliver_date = scrapy.Field()#交付时间
+    house_usage = scrapy.Field()#房屋用途（住宅？）
+    house_property = scrapy.Field()#产权信息
+    building_type = scrapy.Field()#建筑类型(高层?）
+    developer_name = scrapy.Field()#开发商名
+    specials = scrapy.Field()#特色
+    house_num = scrapy.Field()#规划户数
