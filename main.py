@@ -34,7 +34,7 @@ def is_process_alive(pid):
         if process.status() == psutil.STATUS_ZOMBIE:
             return False
         return True
-    except (psutil.NoSuchProcess, psutil.AccessDenied):
+    except :
         return False
 
 if __name__ == "__main__":
@@ -50,10 +50,11 @@ if __name__ == "__main__":
     time.sleep(2*60) #延迟2分钟等数据库中有一定数量的代理
     lianjiaHome.start()
     processList.append(lianjiaHome)
-    while is_process_alive(lianjiaHome.pid):
-        if is_process_alive(freeProxy.pid):
+    while lianjiaHome.is_alive():
+        if freeProxy.exitcode is not None:
+            freeProxy.run() #每10分钟运行一次代理爬虫       
+        else:
             time.sleep(10*60)
-            freeProxy.run() #每10分钟运行一次代理爬虫
     runRedis.terminate()
     freeProxy.terminate()
 
