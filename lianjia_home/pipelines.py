@@ -51,20 +51,34 @@ class FreeProxyPipeline(object):
 
 class FilterPipeline(object):
     def process_item(self, item, spider):
-        if spider.name != "Lianjia_home":
+        if spider.name == "Lianjia_home":
+            item['total_area'] = re.findall(r'\d+\.?\d*', item['total_area'])[0]
+            item['unit_price'] = re.findall(r'\d+,?\d*', item['unit_price'])[0].replace(",", '')
+            for key, value in item.items():
+                if item[key] is not None:
+                    item[key] = value.strip()
+            # 按挂牌日期过滤
+            # start_datetime = datetime.datetime.strptime(item['start_time'], '%Y-%m-%d')
+            # if start_datetime < datetime.datetime(2022, 11, 1):
+            #     raise DropItem(f'日期过早，抛弃此项目:{item}')
+            return item
+        elif spider.name == 'lianjia_nc_new':
+            for key, value in item.items():
+                haveNoData = None
+                haveNoprice = None
+                if item[key] is not None:
+                    item[key] = value.strip()
+                    haveNoData = re.findall('暂无', value)    
+                    haveNoprice = re.findall('待定', value)     
+                if haveNoData or haveNoprice:
+                    item[key] = 0
+            if item['deliver_date'] and len(item['deliver_date']) < 8:
+                item['deliver_date'] = datetime.datetime.strptime(item['deliver_date'], "%Y-%m").strftime('%Y-%m-%d')
+            return item
+        else:
             return
-        item['total_area'] = re.findall(r'\d+\.?\d*', item['total_area'])[0]
-        item['unit_price'] = re.findall(r'\d+,?\d*', item['unit_price'])[0].replace(",", '')
-        for key, value in item.items():
-            if item[key] is not None:
-                item[key] = value.strip()
-        # 按挂牌日期过滤
-        # start_datetime = datetime.datetime.strptime(item['start_time'], '%Y-%m-%d')
-        # if start_datetime < datetime.datetime(2022, 11, 1):
-        #     raise DropItem(f'日期过早，抛弃此项目:{item}')
-        return item
 
-
+#房屋信息插入数据库
 class MySQLPipeLine(object):
     db_conn = None
     db_cursor = None
@@ -79,36 +93,46 @@ class MySQLPipeLine(object):
         self.db_cursor = self.db_conn.cursor()
 
     def process_item(self, item, spider):
-        if spider.name != "Lianjia_home":
+        if spider.name == "Lianjia_home":
+            house_id = item['house_id']
+            title = item['title']
+            house_struct = item['house_struct']
+            floor_info = item['floor_info'].split('(')[0]
+            total_floor = re.findall(r'\d+', item['floor_info'])[0]
+            direction = item['direction']
+            total_area = item['total_area']
+            village_name = item['village_name']
+            district = item['district']
+            region = item['region']
+            fitment = item['fitment']
+            elevator_rate = item['elevator_rate']
+            start_time = item['start_time']
+            house_usage = item['house_usage']
+            house_property = item['house_property']
+            total_price = item['total_price']
+            unit_price = item['unit_price']
+            mortgage_info = item['mortgage_info']
+            url = item['url']
+            values = (house_id, title, house_struct, floor_info, total_floor, direction,
+                    total_area, village_name, district, region, fitment, elevator_rate,
+                    start_time, house_usage, house_property, total_price, unit_price, mortgage_info, url)
+            sql = 'insert into lianjia_nc (house_id, title, house_struct, floor_info, total_floor,direction,\
+                    total_area,village_name,district,region,fitment,elevator_rate,\
+                    start_time,house_usage,house_property,total_price,unit_price,mortgage_info,url)' \
+                ' values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+            self.db_cursor.execute(sql, values)
+            return item
+        elif spider.name == 'lianjia_nc_new':
+            values = (item['url'], item['village_name'], item['unit_price'], item['district'], item['region'],
+                      item['sale_date'], item['deliver_date'], item['house_usage'], item['house_property'], 
+                      item['building_type'], item['developer_name'], item['specials'], item['house_num'])
+            sql = 'insert into lianjia_nc_new (url, village_name, unit_price, district, region, sale_date, \
+                    deliver_date, house_usage, house_property, building_type, developer_name, specials, house_num) \
+                        values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+            self.db_cursor.execute(sql, values)
+            return item
+        else:
             return
-        house_id = item['house_id']
-        title = item['title']
-        house_struct = item['house_struct']
-        floor_info = item['floor_info'].split('(')[0]
-        total_floor = re.findall(r'\d+', item['floor_info'])[0]
-        direction = item['direction']
-        total_area = item['total_area']
-        village_name = item['village_name']
-        district = item['district']
-        region = item['region']
-        fitment = item['fitment']
-        elevator_rate = item['elevator_rate']
-        start_time = item['start_time']
-        house_usage = item['house_usage']
-        house_property = item['house_property']
-        total_price = item['total_price']
-        unit_price = item['unit_price']
-        mortgage_info = item['mortgage_info']
-        url = item['url']
-        values = (house_id, title, house_struct, floor_info, total_floor, direction,
-                  total_area, village_name, district, region, fitment, elevator_rate,
-                  start_time, house_usage, house_property, total_price, unit_price, mortgage_info, url)
-        sql = 'insert into lianjia_nc (house_id, title, house_struct, floor_info, total_floor,direction,\
-                  total_area,village_name,district,region,fitment,elevator_rate,\
-                  start_time,house_usage,house_property,total_price,unit_price,mortgage_info,url)' \
-              ' values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
-        self.db_cursor.execute(sql, values)
-        return item
 
     def close_spider(self, spider):
         self.db_conn.commit()

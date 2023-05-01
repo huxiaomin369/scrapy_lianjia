@@ -40,7 +40,7 @@ class LianjiaNCNewItem(scrapy.Item):
     region = scrapy.Field()#地区
     sale_date = scrapy.Field()#开盘时间
     deliver_date = scrapy.Field()#交付时间
-    house_usage = scrapy.Field()#房屋用途（住宅？）
+    house_usage = scrapy.Field()#房屋用途
     house_property = scrapy.Field()#产权信息
     building_type = scrapy.Field()#建筑类型(高层?）
     developer_name = scrapy.Field()#开发商名
