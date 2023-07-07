@@ -1,0 +1,7 @@
+node_modules
+.DS_Store
+*.vsix
+*.pyc
+*.rdb
+.idea
+.vscode

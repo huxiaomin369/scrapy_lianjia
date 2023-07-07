@@ -61,7 +61,7 @@ if __name__ == "__main__":
     lianjiaHome = LianjiaProcess('lianjiaHome')
     lianjiaNew = LianjiaNewProcess('lianjiaNew')
     proxyProcess = [runRedis, freeProxy]
-    spiderProcess = [lianjiaNew]
+    spiderProcess = [lianjiaHome,lianjiaNew]
     processList = []
     for i in proxyProcess:
         i.start()

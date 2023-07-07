@@ -71,7 +71,10 @@ class FilterPipeline(object):
                     haveNoData = re.findall('暂无', value)    
                     haveNoprice = re.findall('待定', value)     
                 if haveNoData or haveNoprice:
+                    #TODO 设置日期为0时的行为
                     item[key] = 0
+            if item['deliver_date'] == 0 or item['unit_price'] == 0:
+                raise DropItem(f'无日期，抛弃此项目:{item}')
             if item['deliver_date'] and len(item['deliver_date']) < 8:
                 item['deliver_date'] = datetime.datetime.strptime(item['deliver_date'], "%Y-%m").strftime('%Y-%m-%d')
             return item

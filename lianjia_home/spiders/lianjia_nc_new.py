@@ -6,6 +6,19 @@ import redis
 import datetime
 import re
 
+districtDic = {
+    'donghuqu': "东湖区",
+    'nanchangxian': '南昌县',
+    'xinjianqu': '新建区',
+    'wanliqu': '湾里区',
+    'honggutan1': '红谷滩',
+    'xihuqu': '西湖区',
+    'jinxianxian': '进贤县',
+    'qingyunpuqu': '青云谱区',
+    'qingshanhuqu': '青山湖区',
+    'gaoxinqu11': '高新区',
+    'jingkaiqu8': '经开区',
+}
 
 class LianjiaNcNewSpider(scrapy.Spider):
     name = 'lianjia_nc_new'
@@ -13,7 +26,9 @@ class LianjiaNcNewSpider(scrapy.Spider):
 
     def __init__(self):
         self.use_proxy = settings.USE_PROXY
-        self.total_page = 39
+        self.crawl_with_district = settings.CRAWL_WITH_DISTRICT
+        # TODO 暂时无法获取总页数的临时做法
+        self.total_page = 10 if self.crawl_with_district else 30
         if self.use_proxy:
             host = settings.REDIS_HOST
             port = settings.REDIS_PORT
@@ -25,8 +40,13 @@ class LianjiaNcNewSpider(scrapy.Spider):
                                             decode_responses=True)
 
     def start_requests(self):
-        url = 'https://nc.fang.lianjia.com/loupan/'
-        yield self.my_request(url, self.parse, self.error_back)
+        if self.crawl_with_district:
+            for key in districtDic:
+                url = f'https://nc.fang.lianjia.com/loupan/{key}/#{key}'
+                yield self.my_request(url, self.parse, self.error_back)
+        else:
+            url = 'https://nc.fang.lianjia.com/loupan/'
+            yield self.my_request(url, self.parse, self.error_back)
 
     def my_request(self, url, callback, errback, item=None):
         if self.use_proxy:
@@ -58,17 +78,25 @@ class LianjiaNcNewSpider(scrapy.Spider):
                 yield self.my_request(url, self.detailURL_get_parse,self.detailURL_get_error_back)
             except Exception as e:
                 self.logger.error(e)
-        #TODO 获取下一页地址
         cur_page_str = re.findall(r'pg(\d+)', response.url)
         cur_page = 1
         if not cur_page_str: #如果是第一页
             toltal_page_str = response.xpath("//div[@class='page-box']/a[4]/text()").extract_first()
-            # self.total_page = int(toltal_page_str)
+            #TODO 获取总页数 
+            self.total_page = int(toltal_page_str) if toltal_page_str else self.total_page
         else:
             cur_page = int(cur_page_str[0])
         if cur_page < self.total_page:
-            next_url = f"https://nc.fang.lianjia.com/loupan/pg{cur_page+1}/"
-            yield self.my_request(next_url, self.parse, self.error_back)
+            if self.crawl_with_district:
+                try:
+                    sub_district = response.url.split('/')[4]
+                    next_url = f"https://nc.fang.lianjia.com/loupan/{sub_district}/pg{cur_page}/#{sub_district}"
+                    yield self.my_request(next_url, self.parse, self.error_back)
+                except Exception as e:
+                    self.logger.error(e)
+            else:
+                next_url = f"https://nc.fang.lianjia.com/loupan/pg{cur_page+1}/"
+                yield self.my_request(next_url, self.parse, self.error_back)
 
     def detailURL_get_parse(self, response):
         vilage_name = response.xpath("//div[@class='middle-info animation']/ul[1]/li[1]/span[2]/text()").extract_first()
