@@ -57,10 +57,10 @@ if __name__ == "__main__":
     # execute(['scrapy', 'crawl', 'lianjia_nc_new'])
 
     freeProxy = FreeProxyProcess("freeProxy") 
-    runRedis = RunRedis('runRedis')
+    # runRedis = RunRedis('runRedis')
     lianjiaHome = LianjiaProcess('lianjiaHome')
     lianjiaNew = LianjiaNewProcess('lianjiaNew')
-    proxyProcess = [runRedis, freeProxy]
+    proxyProcess = [freeProxy]
     spiderProcess = [lianjiaHome,lianjiaNew]
     processList = []
     for i in proxyProcess:
@@ -77,7 +77,7 @@ if __name__ == "__main__":
             freeProxy.run() #每10分钟运行一次代理爬虫       
         else:
             time.sleep(10*60)
-    runRedis.terminate()
+    # runRedis.terminate()
     freeProxy.terminate()
 
     for i in processList:

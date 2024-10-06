@@ -1,0 +1,50 @@
+
+services:  # 定义服务列表
+  pyapp:
+    # build: . #指定为构建镜像上下文路径(dockerfile 路径)
+    image: ubuntu:22py  # 使用镜像
+    container_name: scrapy_lianjia  # 设置容器名称
+    network_mode: "host"  # 使用主机网络模式
+    # ports:
+    #   - "80:80"  # 将容器的80端口映射到主机的80端口
+    volumes:
+      - "../.:/project"  # 挂载卷
+    working_dir: /project  # 设置容器内的工作目录
+    depends_on:
+      - redis
+      - mysql
+    command: tail -f /dev/null # 设置容器启动时的命令, tail -f /dev/null这个命令防止容器退出
+  metabase:
+    image: metabase/metabase:v0.50.26.1
+    container_name: "metabase"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../data/metabase-data:/metabase-data 
+    environment:
+      MB_DB_FILE: /metabase-data/metabase.db
+  redis: 
+    image: hub.atomgit.com/amd64/redis:7.0.13
+    container_name: "redis"
+    volumes:
+      - ../data/redisData/redis.conf:/etc/redis/redis.conf 
+      - ../data/redisData:/data
+    ports:
+      - "6379:6379"
+    command: redis-server /etc/redis/redis.conf
+  mysql:
+    image: gcr.io/ml-pipeline/mysql:8.0.26 
+    container_name: "mysql"
+    ports:
+      - "3306:3306"
+    volumes:
+      - "../data/mysqlData/files:/var/lib/mysql-files"
+      - "../data/mysqlData/data:/var/lib/mysql"
+      - "../data/mysqlData/log:/var/log/mysql"
+      - "../data/mysqlData/conf:/etc/mysql"
+      - "../.:/project"
+    environment:
+      MYSQL_ROOT_PASSWORD: 971101  # 设置MySQL root用户的密码
+      MYSQL_DATABASE: house  # 创建一个名为house的数据库
+      MYSQL_USER: mhu  # 创建一个新用户
+      MYSQL_PASSWORD: 971101  # 设置新用户的密码
