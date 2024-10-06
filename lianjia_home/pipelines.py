@@ -3,7 +3,7 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 import re
-import MySQLdb
+import pymysql
 import redis
 import datetime
 from scrapy.exceptions import DropItem
@@ -91,7 +91,7 @@ class MySQLPipeLine(object):
         host = spider.settings.get('MYSQL_HOST')
         user = spider.settings.get('MYSQL_USER')
         pwd = spider.settings.get('MYSQL_PASSWORD')
-        self.db_conn = MySQLdb.connect(db=db_name, host=host, user=user,
+        self.db_conn = pymysql.connect(db=db_name, host=host, user=user,
                                        password=pwd, charset='utf8')
         self.db_cursor = self.db_conn.cursor()
 

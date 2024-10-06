@@ -1,1 +1,5 @@
 Scrapy
+psutil
+redis
+pymysql
+fake-useragent

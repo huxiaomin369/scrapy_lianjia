@@ -17,3 +17,13 @@ docker exec -it mysql mysql -uroot -p
 pip install -r requirements.txt
 ```
 
+```sql
+# 创建数据库
+CREATE DATABASE IF NOT EXISTS house
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
+
+# 修改root 用户密码
+ALTER USER 'root'@'localhost' IDENTIFIED BY 'new_password';
+```
+
