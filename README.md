@@ -15,6 +15,9 @@ docker exec -it mysql mysql -uroot -p
 
 # 安装依赖
 pip install -r requirements.txt
+
+# 查看本机ip
+hostname -I
 ```
 
 ```sql

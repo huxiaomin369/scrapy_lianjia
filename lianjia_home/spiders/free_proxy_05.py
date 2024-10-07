@@ -7,7 +7,7 @@ import re
 class FreeProxy05Spider(scrapy.Spider):
     name = 'free_proxy_05'
     # allowed_domains = ['proxy.seofangfa.com']
-    start_urls = ['http://proxy.seofangfa.com/', \
+    start_urls = ['https://proxycompass.com/cn/free-proxies/asia/china/', \
                   'https://www.89ip.cn/index_1.html']
     max_page = 10
 
@@ -28,11 +28,11 @@ class FreeProxy05Spider(scrapy.Spider):
                        )
 
     def parse(self, response):
-        if response.url.find('seofangfa') != -1:
-            selector = response.xpath("//table[@class='table']")
-            for i in range(1, 6):
-                ip = selector.xpath(f"tbody/tr[{i}]/td[1]/text()").extract_first()
-                port = selector.xpath(f"tbody/tr[{i}]/td[2]/text()").extract_first()
+        if response.url.find('proxycompass') != -1:
+            table_selector = response.xpath("//table[@id='proxylister-table']")
+            for selector in table_selector.xpath("tbody/tr"):
+                ip = selector.xpath(f"td[1]/text()").extract_first()
+                port = selector.xpath(f"td[2]/text()").extract_first()
                 # self.parse_ip_port(ip, port)
                 yield self.test_proxy_request(ip, port)
         elif response.url.find('89ip') != -1:

@@ -14,9 +14,9 @@ NEWSPIDER_MODULE = 'lianjia_home.spiders'
 
 SAVE_FILE_NAME = 'house_ifo.csv'
 MYSQL_DB_NAME = 'house'
-MYSQL_HOST = 'localhost'
+MYSQL_HOST = '172.18.0.4' #localhost
 MYSQL_PASSWORD = '971101'
-MYSQL_USER = 'root'
+MYSQL_USER = 'mhu'
 
 REDIS_HOST = "localhost"#主机地址
 REDIS_PORT = 6379        #端口

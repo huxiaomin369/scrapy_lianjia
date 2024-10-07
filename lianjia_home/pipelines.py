@@ -40,7 +40,9 @@ class FreeProxyPipeline(object):
             # 将item转换为字典类型
             item_dict = dict(item)
             # 将item_dict保存于key为ip的集合中
-            self.db_conn.sadd("ip", item_dict["url"])
+            if (item_dict["url"] is not None) :
+                self.db_conn.sadd("ip", item_dict["url"])
+            
         return item
 
     def close_spider(self, spider):
@@ -73,10 +75,12 @@ class FilterPipeline(object):
                 if haveNoData or haveNoprice:
                     #TODO 设置日期为0时的行为
                     item[key] = 0
-            if item['deliver_date'] == 0 or item['unit_price'] == 0:
-                raise DropItem(f'无日期，抛弃此项目:{item}')
+            if item['deliver_date'] == 0 or item['unit_price'] == 0 or item['district'] == 0:
+                raise DropItem(f'无日期或无district, 抛弃此项目:{item}')
             if item['deliver_date'] and len(item['deliver_date']) < 8:
                 item['deliver_date'] = datetime.datetime.strptime(item['deliver_date'], "%Y-%m").strftime('%Y-%m-%d')
+            if item['sale_date'] and len(item['sale_date']) < 8:
+                item['sale_date'] = datetime.datetime.strptime(item['sale_date'], "%Y-%m").strftime('%Y-%m-%d')
             return item
         else:
             return

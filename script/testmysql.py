@@ -1,8 +1,8 @@
 import pymysql
 
 # 连接到 MySQL 数据库
-connection = pymysql.connect(host='localhost',
-                             user='root',
+connection = pymysql.connect(host='172.18.0.4',
+                             user='mhu',
                              password='971101',
                              database='house',
                              charset='utf8mb4')
