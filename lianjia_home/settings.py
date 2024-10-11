@@ -14,9 +14,9 @@ NEWSPIDER_MODULE = 'lianjia_home.spiders'
 
 SAVE_FILE_NAME = 'house_ifo.csv'
 MYSQL_DB_NAME = 'house'
-MYSQL_HOST = '172.18.0.4' #localhost
+MYSQL_HOST = 'localhost' #  172.18.0.4
 MYSQL_PASSWORD = '971101'
-MYSQL_USER = 'mhu'
+MYSQL_USER = 'root' #mhu
 
 REDIS_HOST = "localhost"#主机地址
 REDIS_PORT = 6379        #端口
@@ -40,7 +40,7 @@ ROBOTSTXT_OBEY = False
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 1
+DOWNLOAD_DELAY = 3
 RANDOMIZE_DOWNLOAD_DELAY = True
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16

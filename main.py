@@ -4,37 +4,33 @@ import os
 import time
 import psutil
 
-class FreeProxyProcess(Process): 
-    def __init__(self,name):
-        super(FreeProxyProcess,self).__init__()
-        self.name = name
+def mutiProcessFunc(cmd):
+    os.system(cmd)
 
-    def run(self):
-        os.system('scrapy crawl free_proxy_05')
+def main():
 
-class RunRedis(Process): 
-    def __init__(self,name):
-        super(RunRedis,self).__init__()
-        self.name = name
+    processArgs = ["E:\\pythonCode\\DATA_BASE\Redis-x64-5.0.14.1\\redis-server.exe",
+                   "scrapy crawl free_proxy_05",
+                   "scrapy crawl Lianjia_home",
+                   "crapy crawl lianjia_nc_new"]
+    # 创建进程列表
+    allProcesses = []
 
-    def run(self):
-        os.system("E:\\pythonCode\\DATA_BASE\Redis-x64-5.0.14.1\\redis-server.exe")
+    for i in range(len(processArgs)):
+        p = Process(target=mutiProcessFunc, args=(processArgs[i],))
+        allProcesses.append(p)
+        p.start()
+    
+    while have_process_alive(allProcesses):
+        if not allProcesses[1].is_alive():
+            allProcesses[1].run() #每10分钟运行一次代理爬虫       
+        else:
+            time.sleep(10*60)
 
-class LianjiaProcess(Process): 
-    def __init__(self,name):
-        super(LianjiaProcess,self).__init__()
-        self.name = name
+    # 等待所有进程完成
+    for process in allProcesses:
+        process.join()
 
-    def run(self):
-        os.system("scrapy crawl Lianjia_home")
-
-class LianjiaNewProcess(Process): 
-    def __init__(self,name):
-        super(LianjiaNewProcess,self).__init__()
-        self.name = name
-
-    def run(self):
-        os.system('scrapy crawl lianjia_nc_new')
 
 def is_process_alive(pid):
     try:
@@ -52,36 +48,8 @@ def have_process_alive(processList):
     return isAlive
 
 if __name__ == "__main__":
-    # execute(['scrapy', 'crawl', 'free_proxy_05'])
-    # execute(['scrapy', 'crawl', 'Lianjia_home'])
-    # execute(['scrapy', 'crawl', 'lianjia_nc_new'])
-
-    freeProxy = FreeProxyProcess("freeProxy") 
-    # runRedis = RunRedis('runRedis')
-    lianjiaHome = LianjiaProcess('lianjiaHome')
-    lianjiaNew = LianjiaNewProcess('lianjiaNew')
-    proxyProcess = [freeProxy]
-    spiderProcess = [lianjiaHome,lianjiaNew]
-    processList = []
-    for i in proxyProcess:
-        i.start()
-        processList.append(i)
-        time.sleep(5)
-    time.sleep(2*60) #延迟2分钟等数据库中有一定数量的代理
-    for i in spiderProcess:
-        i.start()
-        processList.append(i)
-
-    while have_process_alive(spiderProcess):
-        if not freeProxy.is_alive():
-            freeProxy.run() #每10分钟运行一次代理爬虫       
-        else:
-            time.sleep(10*60)
-    # runRedis.terminate()
-    freeProxy.terminate()
-
-    for i in processList:
-        i.join()
+    main()
+    
 
 
 

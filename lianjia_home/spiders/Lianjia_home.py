@@ -49,6 +49,13 @@ class LianjiaHomeSpider(scrapy.Spider):
             yield self.my_request(url, self.parse, self.error_back)
 
     def my_request(self, url, callback, errback, item=None):
+        headers = {
+            'Content-Type': "application/x-www-form-urlencoded;charset=UTF-8",
+            'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36",
+            "referer": "https://clogin.lianjia.com/",}   
+
+        cookies = {
+            'lianjia_token': '2.0012a42c5d7cc4064f0309056c74eff18b',}
         if self.use_proxy:
             proxy = self.db_conn.srandmember('ip')
             self.logger.info(f"use proxy {proxy}")
@@ -60,6 +67,8 @@ class LianjiaHomeSpider(scrapy.Spider):
             if item:
                 meta['item'] = item
             return Request(url,
+                           headers=headers,
+                           cookies=cookies,
                           callback=callback,
                           errback=errback,
                           meta=meta,
@@ -67,7 +76,7 @@ class LianjiaHomeSpider(scrapy.Spider):
                           )
         else:
             meta = {'item': item} if (item is not None) else None
-            return Request(url=url, callback=callback, meta=meta)
+            return Request(url=url, callback=callback, meta=meta,headers=headers,cookies=cookies)
 
     def parse(self, response):
         list_selector = response.xpath("//div[@class='info clear']")
