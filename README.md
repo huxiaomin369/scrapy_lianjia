@@ -8,7 +8,22 @@ scrapy爬虫 爬取nc链家房价数据
 ### 2、房价爬虫
 读取redis缓存的代，使用代理进行爬取，爬取过程中会自动删除redis数据库中的无效代理，并将爬取到的房价数据存入MySQL数据库
 
+## 使用
+docker 一键部署 (2024 new)
+``` sh
+cd docker
+docker-compose up -d
+
+# 初始化mysql
+## 进入mysql 容器
+docker exec -it mysql /bin/bash
+## 初始化数据库
+bash initmysql.sh
+```
+
 ## tips 
+lianjia已有反爬虫机制，需要登录验证，且登录加密，目前只能手动指定cookie中的token才能爬取
+
 ```sh
 # 访问mysql数据库
 docker exec -it mysql mysql -uroot -p

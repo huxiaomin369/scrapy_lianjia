@@ -28,6 +28,7 @@ class LianjiaHomeSpider(scrapy.Spider):
     allowed_domains = ['nc.lianjia.com']
 
     def __init__(self):
+        # self.driver = webdriver.PhantomJS() # 无界面浏览器驱动(防反爬虫用)
         self.use_proxy = settings.USE_PROXY
         self.crawl_with_district = settings.CRAWL_WITH_DISTRICT
         host = settings.REDIS_HOST

@@ -62,7 +62,12 @@ class LianjiaHomeSpiderMiddleware:
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
 
-
+# import time
+# from scrapy.http import HtmlResponse
+# from selenium.webdriver.comom.by import By
+# from selenium.webdriver.support.wait import WebDriverWait
+# from selenium.webdriver.support import expected_conditions as EC
+# from selenium.common.exceptions import NoSuchElementException,TimeoutException
 class LianjiaHomeDownloaderMiddleware:
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the downloader middleware does not modify the
@@ -79,12 +84,28 @@ class LianjiaHomeDownloaderMiddleware:
         # Called for each request that goes through the downloader
         # middleware.
 
-        # Must either:
-        # - return None: continue processing this request
-        # - or return a Response object
-        # - or return a Request object
-        # - or raise IgnoreRequest: process_exception() methods of
-        #   installed downloader middleware will be called
+        # 使用无界面浏览器命令请求网页，防反爬虫
+        # if spider.name=="Lianjia_home" or spider.name=="lianjia_nc_new"
+        #     spider.driver.get(request.url)
+        #     try:
+        #         wait = WebDriverWait(spider.driver, 5)#最长等待时长
+        #         # 等到需要爬取的xxxx内容加载完成
+        #         wait.until(EC.presence_of_element_located(By.XPATH,"//div[@class="xxxx"]"))
+        #         # 模拟浏览器的向下滚动操作
+        #         spider.driver.execute_script("window.scrollTo(0,document.body.scrollHeight/2)")
+        #         for i in range(10):
+        #             time.sleep(5)
+        #             spider.driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
+        #         # 获取加载完成的页面
+        #         origin_code = spider.driver.page_source
+        #         res = HtmlResponse(url=request.url, encoding='utf8', 
+        #                            body=origin_code,
+        #                            request=request)
+        #         return res
+        #     except TimeoutException:
+        #         print("time out")
+        #     except NoSuchElementException:
+        #         print("nosuch element")
         return None
 
     def process_response(self, request, response, spider):
