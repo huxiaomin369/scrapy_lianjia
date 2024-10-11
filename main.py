@@ -23,7 +23,9 @@ def main():
     
     while have_process_alive(allProcesses):
         if not allProcesses[1].is_alive():
-            allProcesses[1].run() #每10分钟运行一次代理爬虫       
+            p = Process(target=mutiProcessFunc, args=(processArgs[1],))
+            p.run() #每10分钟运行一次代理爬虫  
+            allProcesses[1] = p     
         else:
             time.sleep(10*60)
 
