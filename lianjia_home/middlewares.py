@@ -62,12 +62,6 @@ class LianjiaHomeSpiderMiddleware:
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
 
-# import time
-# from scrapy.http import HtmlResponse
-# from selenium.webdriver.comom.by import By
-# from selenium.webdriver.support.wait import WebDriverWait
-# from selenium.webdriver.support import expected_conditions as EC
-# from selenium.common.exceptions import NoSuchElementException,TimeoutException
 class LianjiaHomeDownloaderMiddleware:
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the downloader middleware does not modify the
@@ -111,10 +105,6 @@ class LianjiaHomeDownloaderMiddleware:
     def process_response(self, request, response, spider):
         # Called with the response returned from the downloader.
 
-        # Must either;
-        # - return a Response object
-        # - return a Request object
-        # - or raise IgnoreRequest
         return response
 
     def process_exception(self, request, exception, spider):

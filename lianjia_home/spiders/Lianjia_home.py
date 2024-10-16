@@ -7,7 +7,26 @@ from scrapy.spiders import Spider
 from lianjia_home.items import LianjiaHomeItem
 from lianjia_home import settings
 from scrapy.loader import ItemLoader
+from selenium import webdriver
 import json
+
+import time
+from scrapy.http import HtmlResponse
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import NoSuchElementException,TimeoutException
+
+import numpy as np
+import cv2
+from urllib.request import urlopen
+import ddddocr
+
+def url_to_image(url):
+    resp = urlopen(url)
+    image = np.asarray(bytearray(resp.read()), dtype="uint8")
+    image = cv2.imdecode(image, cv2.IMREAD_COLOR)
+    return image
 
 districtDic = {
     'donghuqu': "东湖区",
@@ -28,7 +47,7 @@ class LianjiaHomeSpider(scrapy.Spider):
     allowed_domains = ['nc.lianjia.com']
 
     def __init__(self):
-        # self.driver = webdriver.PhantomJS() # 无界面浏览器驱动(防反爬虫用)
+        self.driver = webdriver.PhantomJS() # 无界面浏览器驱动(防反爬虫用)
         self.use_proxy = settings.USE_PROXY
         self.crawl_with_district = settings.CRAWL_WITH_DISTRICT
         host = settings.REDIS_HOST
@@ -56,7 +75,7 @@ class LianjiaHomeSpider(scrapy.Spider):
             "referer": "https://clogin.lianjia.com/",}   
 
         cookies = {
-            'lianjia_token': '2.0012a42c5d7cc4064f0309056c74eff18b',}
+            'lianjia_token': '2.001530f5347b50df26049ddc05d55f62ee',}
         if self.use_proxy:
             proxy = self.db_conn.srandmember('ip')
             self.logger.info(f"use proxy {proxy}")
@@ -80,6 +99,25 @@ class LianjiaHomeSpider(scrapy.Spider):
             return Request(url=url, callback=callback, meta=meta,headers=headers,cookies=cookies)
 
     def parse(self, response):
+        if response.url.find('location=https') != -1: # 验证码页面
+            print("********************************************************************************************************")
+            self.driver.get(response.url)
+            wait = WebDriverWait(self.driver, 5)#最长等待时长
+
+            wait.until(EC.presence_of_element_located(By.CLASS_NAME,"bk-captcha-btn"))
+            # element = spider.driver.find_element_by_css_selector("button[class='bk-captcha-btn']").click()
+            print(self.driver.page_source)
+            element = self.driver.find_element(By.CLASS_NAME, "bk-captcha-btn")
+            imageUrl = element.get_attribute('src')
+            print(imageUrl)
+            codeImage = url_to_image(imageUrl)
+            ocr = ddddocr.DdddOcr(use_gpu=False,show_ad=False,beta=True)
+            ocr.set_ranges(0)  # 0:纯数字  6:大小写加数字
+            result = ocr.classification(codeImage, probability=False,png_fix=True)
+            input_element = self.driver.find_element(By.NAME, "imageCaptchaCode")
+            input_element.clear()
+            # 向 input 元素发送键盘输入
+            input_element.send_keys(result)
         list_selector = response.xpath("//div[@class='info clear']")
         for one_selector in list_selector:
             try:

@@ -23,7 +23,7 @@ REDIS_PORT = 6379        #端口
 REDIS_DB_INDEX = 0       #索引
 REDIS_PASSWORD = ""#密码
 
-USE_PROXY = 1 #使用代理1，不使用0
+USE_PROXY = 0 #使用代理1，不使用0
 CRAWL_WITH_DISTRICT = 0 #是否分行政区爬取，分行政区爬取数据全，数据量大
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = "Mozilla/5.0 \
@@ -67,7 +67,7 @@ RANDOMIZE_DOWNLOAD_DELAY = True
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-    'lianjia_home.middlewares.LianjiaHomeDownloaderMiddleware': None,
+    'lianjia_home.middlewares.LianjiaHomeDownloaderMiddleware': 101,
     'lianjia_home.middlewares.LianjiaHomeUserAgentMiddleware': 100,
 }
 

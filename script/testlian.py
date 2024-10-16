@@ -7,11 +7,11 @@ import json
 url = "https://nc.lianjia.com/ershoufang/co32/"
 
 # 登录所需的数据
-form_data = {
-    'username': 'xxxx',
-    'password': 'xxxx'
-}
-body = urlencode(form_data)
+# form_data = {
+#     'username': 'xxxx',
+#     'password': 'xxxx'
+# }
+# body = urlencode(form_data)
 
 # 发送POST请求
 headers = {
