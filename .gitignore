@@ -8,3 +8,5 @@ data
 .vscode
 result.txt
 *.log
+*.png
+*.jpg

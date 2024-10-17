@@ -11,19 +11,20 @@ from selenium.common.exceptions import NoSuchElementException,TimeoutException
 from selenium.webdriver.chrome.options import Options
 from PIL import Image
 
-import numpy as np
+import base64
+import io
+from lxml import html
 import cv2
-from urllib.request import urlopen
 
 
-def url_to_image(url):
-    resp = urlopen(url)
-    image = np.asarray(bytearray(resp.read()), dtype="uint8")
-    image = cv2.imdecode(image, cv2.IMREAD_COLOR)
-    # cv2.imwrite('codeImage.jpg', image)
-    # 将OpenCV的图像格式转换为Pillow的图像格式
-    img_pil = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-    return img_pil
+def url_to_image(encoded_image):
+    # # 分割 Data URI 以获取 Base64 编码的部分
+    _, encoded_image = data_uri.split(',', 1)
+    # 解码 Base64 字符串为二进制数据
+    decoded_image = base64.b64decode(encoded_image)
+    # 使用 PIL 库将二进制数据转换为图像对象
+    image = Image.open(io.BytesIO(decoded_image))
+    return image
 
 # ocr = ddddocr.DdddOcr(use_gpu=False,show_ad=False,beta=True)
 
@@ -42,26 +43,49 @@ options.add_argument('--headless')
 options.add_argument('--disable-gpu')
 options.add_argument('--no-sandbox')
 options.add_argument('--disable-extensions')
-# options.add_experimental_option('excludeSwitches', ['enable-automation'])
-# options.add_experimental_option('useAutomationExtension', False)
+options.add_experimental_option('excludeSwitches', ['enable-automation'])
+options.add_experimental_option('useAutomationExtension', False)
 # 指定ChromeDriver的路径（如果需要）
 # driver = webdriver.Chrome(executable_path='~/app/chromedriver-linux64/chromedriver', options=options)
 # 使用无头模式启动Chrome
-driver = webdriver.Chrome(options=options)
-driver.get("https://hip.lianjia.com/captcha?location=https%3A%2F%2Fnc.lianjia.com%2Fershoufang%2Fco32%2F&ext=8uCSus46f-3VBXcJh6HTLW4wekvT6WqbyNd2kw92kXTIt5aFXuL9LzwLckApSjkMLvCXMXRA8w_NNbFYIj5HXtb44C_phQpbush-lKKAje85BNNfVbkivCF6yVYt6RvroPDILjc-_MdZkHQRE_ej2Gq4MnRHta2UoSkC9983rppA")
-wait = WebDriverWait(driver, 10)#最长等待时长
-wait.until(EC.presence_of_element_located((By.CLASS_NAME, "bk-captcha-btn")))
-element = driver.find_element(By.NAME, "imageCaptcha")
-imageUrl = element.get_attribute('src')
-print("**********************imageurl********************")
-print(imageUrl)
-codeImage = url_to_image(imageUrl)
-ocr = ddddocr.DdddOcr(use_gpu=False,show_ad=False,beta=True)
-ocr.set_ranges(0)  # 0:纯数字  6:大小写加数字
-result = ocr.classification(codeImage, probability=False,png_fix=True)
-input_element = driver.find_element(By.NAME, "imageCaptchaCode")
-input_element.clear()
-# 向 input 元素发送键盘输入
-input_element.send_keys(result)
-time.sleep(10)
-print(driver.page_source)
+driver = None
+try:
+    driver = webdriver.Chrome(options=options)
+    driver.get("https://hip.lianjia.com/captcha?location=https%3A%2F%2Fnc.lianjia.com%2Fershoufang%2Fco32%2F&ext=8uCSus46f-3VBXcJh6HTLW4wekvT6WqbyNd2kw92kXTIt5aFXuL9LzwLckApSjkMLvCXMXRA8w_NNbFYIj5HXtb44C_phQpbush-lKKAje85BNNfVbkivCF6yVYt6RvroPDILjc-_MdZkHQRE_ej2Gq4MnRHta2UoSkC9983rppA")
+    wait = WebDriverWait(driver, 10)#最长等待时长
+    buttonElement=wait.until(EC.presence_of_element_located((By.CLASS_NAME, "bk-captcha-btn")))
+    buttonElement.click()
+    time.sleep(1) #等待验证码刷新
+    print("**********************imageurl********************")
+    # *******************url方式获取原图(base64编码)*********
+    # h5content = driver.page_source
+    # element = driver.find_element(By.NAME, "imageCaptcha")
+    # imageUrl = element.get_attribute('src')
+    # codeImage = url_to_image(imageUrl)
+    
+    # **************截图方式获取验证码图*****************
+    driver.save_screenshot('temp.png')
+    image = cv2.imread('temp.png')
+    # (x, y) 裁剪区域左上角坐标，w 和 h 分别是裁剪区域的宽度和高度
+    x, y, w, h = 260, 170, 200, 70
+    cropped_image = image[y:y+h, x:x+w]
+    cv2.imwrite('temp2.jpg', cropped_image)
+    codeImage = Image.fromarray(cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB))
+    
+    ocr = ddddocr.DdddOcr(use_gpu=False,show_ad=False,beta=True)
+    ocr.set_ranges(0)  # 0:纯数字  6:大小写加数字
+    result = ocr.classification(codeImage, probability=False,png_fix=True)
+    print(f"******************{result}****************")
+    input_element = driver.find_element(By.NAME, "imageCaptchaCode")
+    driver.save_screenshot('temp3.png')
+    input_element.clear()
+    input_element.send_keys(result) # 填写验证码
+    driver.save_screenshot('result.png')
+    time.sleep(5)
+    # print(driver.page_source)
+    driver.save_screenshot('final.png')
+finally:
+    print("*****final******")
+    if driver is not None:
+        driver.quit()
+
