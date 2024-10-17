@@ -13,6 +13,8 @@ from PIL import Image
 
 import base64
 import io
+from lxml import html
+import cv2
 
 
 def url_to_image(data_uri):
@@ -43,10 +45,12 @@ options.add_argument('--no-sandbox')
 options.add_argument('--disable-extensions')
 options.add_experimental_option('excludeSwitches', ['enable-automation'])
 options.add_experimental_option('useAutomationExtension', False)
+# 指定ChromeDriver的路径（如果需要）
+# driver = webdriver.Chrome(executable_path='~/app/chromedriver-linux64/chromedriver', options=options)
+# 使用无头模式启动Chrome
 driver = None
 try:
-    driver = webdriver.Chrome(executable_path='D:\下载\chromedriver-win64\chromedriver.exe', options=options)
-    # driver = webdriver.Chrome(options=options)
+    driver = webdriver.Chrome(options=options)
     driver.get("https://hip.lianjia.com/captcha?location=https%3A%2F%2Fnc.lianjia.com%2Fershoufang%2Fco32%2F&ext=8uCSus46f-3VBXcJh6HTLW4wekvT6WqbyNd2kw92kXTIt5aFXuL9LzwLckApSjkMLvCXMXRA8w_NNbFYIj5HXtb44C_phQpbush-lKKAje85BNNfVbkivCF6yVYt6RvroPDILjc-_MdZkHQRE_ej2Gq4MnRHta2UoSkC9983rppA")
     wait = WebDriverWait(driver, 10)#最长等待时长
     buttonElement=wait.until(EC.presence_of_element_located((By.CLASS_NAME, "bk-captcha-btn")))
@@ -54,18 +58,19 @@ try:
     time.sleep(1) #等待验证码刷新
     print("**********************imageurl********************")
     # *******************url方式获取原图(base64编码)*********
-    element = driver.find_element(By.NAME, "imageCaptcha")
-    imageUrl = element.get_attribute('src')
-    codeImage = url_to_image(imageUrl)
+    # h5content = driver.page_source
+    # element = driver.find_element(By.NAME, "imageCaptcha")
+    # imageUrl = element.get_attribute('src')
+    # codeImage = url_to_image(imageUrl)
     
     # **************截图方式获取验证码图*****************
-    # driver.save_screenshot('temp.png')
-    # image = cv2.imread('temp.png')
-    # # (x, y) 裁剪区域左上角坐标，w 和 h 分别是裁剪区域的宽度和高度
-    # x, y, w, h = 260, 170, 200, 70
-    # cropped_image = image[y:y+h, x:x+w]
-    # cv2.imwrite('temp2.jpg', cropped_image)
-    # codeImage = Image.fromarray(cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB))
+    driver.save_screenshot('temp.png')
+    image = cv2.imread('temp.png')
+    # (x, y) 裁剪区域左上角坐标，w 和 h 分别是裁剪区域的宽度和高度
+    x, y, w, h = 260, 170, 200, 70
+    cropped_image = image[y:y+h, x:x+w]
+    cv2.imwrite('temp2.jpg', cropped_image)
+    codeImage = Image.fromarray(cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB))
     
     ocr = ddddocr.DdddOcr(use_gpu=False,show_ad=False,beta=True)
     ocr.set_ranges(0)  # 0:纯数字  6:大小写加数字

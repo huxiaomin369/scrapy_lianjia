@@ -61,6 +61,28 @@ class LianjiaHomeSpiderMiddleware:
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+        
+import time
+from scrapy.http import HtmlResponse
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import NoSuchElementException,TimeoutException
+from selenium.webdriver.chrome.options import Options
+from PIL import Image
+import ddddocr
+
+import base64
+import io
+
+def url_to_image(data_uri):
+    # # 分割 Data URI 以获取 Base64 编码的部分
+    _, encoded_image = data_uri.split(',', 1)
+    # 解码 Base64 字符串为二进制数据
+    decoded_image = base64.b64decode(encoded_image)
+    # 使用 PIL 库将二进制数据转换为图像对象
+    image = Image.open(io.BytesIO(decoded_image))
+    return image
 
 class LianjiaHomeDownloaderMiddleware:
     # Not all methods need to be defined. If a method is not defined,
@@ -76,7 +98,51 @@ class LianjiaHomeDownloaderMiddleware:
 
     def process_request(self, request, spider):
         # Called for each request that goes through the downloader
-        # middleware.
+        res = None
+        if spider.name=="Lianjia_home" or spider.name=="lianjia_nc_new": 
+            if spider.driver is None :   
+                return None
+            
+            spider.driver.get(request.url)
+            cookies = {'name': 'lianjia_token', 'value': '2.0015d6f6987bb6dc8a047bdfa9ec1edb32'}
+            spider.driver.add_cookie(cookies)
+            spider.driver.get(request.url)
+            time.sleep(3) #等待页面加载
+            current_url = spider.driver.current_url
+            if current_url.find('captcha?location=https') == -1: 
+                res = HtmlResponse(url=current_url, encoding='utf8', 
+                    body=spider.driver.page_source,
+                    request=request)
+            else:
+                try:
+                    wait = WebDriverWait(spider.driver, 5)#最长等待时长
+                    buttonElement=wait.until(EC.presence_of_element_located((By.CLASS_NAME, "bk-captcha-btn")))
+                    buttonElement.click()
+                    
+                    print("**********************imageurl********************")
+                    # *******************url方式获取原图(base64编码)*********
+                    element = spider.driver.find_element(By.NAME, "imageCaptcha")
+                    imageUrl = element.get_attribute('src')
+                    codeImage = url_to_image(imageUrl)             
+                    ocr = ddddocr.DdddOcr(use_gpu=False,show_ad=False,beta=True)
+                    ocr.set_ranges(0)  # 0:纯数字  6:大小写加数字
+                    result = ocr.classification(codeImage, probability=False,png_fix=True)
+                    print(f"******************{result}****************")
+                    input_element = spider.driver.find_element(By.NAME, "imageCaptchaCode")
+                    # spider.driver.save_screenshot('temp3.png')
+                    input_element.clear()
+                    input_element.send_keys(result) # 填写验证码
+                    # spider.driver.save_screenshot('result.png')
+                    time.sleep(3)
+                    # print(driver.page_source)
+                    # spider.driver.save_screenshot('final.png')
+                    res = HtmlResponse(url=request.url, encoding='utf8', 
+                        body=spider.driver.page_source,
+                        request=request)
+                except Exception as e:
+                    print(e)
+        return res
+
 
         # 使用无界面浏览器命令请求网页，防反爬虫
         # if spider.name=="Lianjia_home" or spider.name=="lianjia_nc_new"
@@ -100,7 +166,7 @@ class LianjiaHomeDownloaderMiddleware:
         #         print("time out")
         #     except NoSuchElementException:
         #         print("nosuch element")
-        return None
+        # return None
 
     def process_response(self, request, response, spider):
         # Called with the response returned from the downloader.

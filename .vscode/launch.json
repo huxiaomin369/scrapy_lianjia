@@ -1,0 +1,49 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "debugMain",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "nihao",
+                "woshi",
+                "mhu"
+            ],
+            "pythonArgs": [
+                "-u",  // 以非缓冲模式运行
+            ],
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "NODE_ENV": "development",
+                "CUSTOM_USR_NAME": "mhu",
+                "PYTHONPATH":"$PYTHONPATH:${workspaceFolder}"
+            }, 
+            // "preLaunchTask": "preLaunchAll",
+        },
+        {
+            "name": "debugTest",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/testOcr.py",
+            "console": "integratedTerminal",
+            "args": [
+                "nihao",
+                "woshi",
+                "mhu"
+            ],
+            "pythonArgs": [
+                "-u",  // 以非缓冲模式运行
+            ],
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "NODE_ENV": "development",
+                "CUSTOM_USR_NAME": "mhu",
+                "PYTHONPATH":"$PYTHONPATH:${workspaceFolder}"
+            }, 
+            // "preLaunchTask": "preLaunchAll",
+        }
+    ]
+}

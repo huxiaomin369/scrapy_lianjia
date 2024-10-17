@@ -5,7 +5,7 @@ data
 *.pyc
 *.rdb
 .idea
-.vscode
+settings.json
 result.txt
 *.log
 *.png
