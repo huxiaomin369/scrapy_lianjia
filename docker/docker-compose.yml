@@ -4,7 +4,7 @@ services:  # 定义服务列表
     # build: . #指定为构建镜像上下文路径(dockerfile 路径)
     image: ubuntu:22py  # 使用镜像
     container_name: scrapy_lianjia  # 设置容器名称
-    network_mode: "host"  # 使用主机网络模式
+    # network_mode: "host"  # 使用主机网络模式
     # ports:
     #   - "80:80"  # 将容器的80端口映射到主机的80端口
     volumes:

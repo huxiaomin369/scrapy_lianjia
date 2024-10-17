@@ -25,6 +25,18 @@ bash initmysql.sh
 lianjia已有反爬虫机制，需要登录验证，且登录加密，目前只能手动指定cookie中的token才能爬取
 
 ```sh
+# chrome 驱动
+https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json
+wget https://chromedriver.storage.googleapis.com/130.0.6723.58/chromedriver_linux64.zip
+unzip chromedriver_linux64.zip
+sudo cp ./chromedriver-linux64/chromedriver /usr/bin/chromedriver
+
+#安装PhantomJS
+wget https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2
+
+# 设置环境变量OPENSSL_CONF来禁用OpenSSL 3的配置加载
+export OPENSSL_CONF=/etc/ssl/
+
 # 访问mysql数据库
 docker exec -it mysql mysql -uroot -p
 
