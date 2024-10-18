@@ -125,6 +125,8 @@ class LianjiaHomeDownloaderMiddleware:
                     ocr = ddddocr.DdddOcr(use_gpu=False,show_ad=False,beta=True)
                     ocr.set_ranges(0)  # 0:纯数字  6:大小写加数字
                     result = ocr.classification(codeImage, probability=False,png_fix=True)
+                    if len(result) != 4 :
+                        result = "aaaa" # 验证码识别长度不对则随意填充刷新验证码，防止死循环卡住
                     print(f"******************{result}****************")
                     input_element = spider.driver.find_element(By.NAME, "imageCaptchaCode")
                     input_element.clear()
