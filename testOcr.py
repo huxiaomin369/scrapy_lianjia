@@ -64,9 +64,9 @@ try:
     print(driver.current_url)
     driver.get("https://nc.lianjia.com/ershoufang/co32/")
     time.sleep(3)
-    cookies = driver.get_cookies()
-    print("*****************cookies****************")
-    print(cookies)
+    # cookies = driver.get_cookies()
+    # print("*****************cookies****************")
+    # print(cookies)
     driver.save_screenshot('temp0.png')
     curUrl = driver.current_url
     while curUrl.find('captcha?location=https') != -1:
@@ -104,9 +104,9 @@ try:
         curUrl = driver.current_url
     # print(driver.page_source)
     driver.save_screenshot('final.png')
-    cookies = driver.get_cookies()
-    print("*****************cookies****************")
-    print(cookies)
+    driver.get("https://nc.lianjia.com/ershoufang/co32/")
+    time.sleep(3)
+    driver.save_screenshot('final2.png')
 finally:
     print("*****final******")
     if driver is not None:

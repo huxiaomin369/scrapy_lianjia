@@ -104,12 +104,11 @@ class LianjiaHomeDownloaderMiddleware:
                 return None
 
             spider.driver.get(request.url)
-            cookies = {'name': 'lianjia_token', 'value': '2.0015d6f6987bb6dc8a047bdfa9ec1edb32', 'domain': '.lianjia.com'}
-            spider.driver.add_cookie(cookies)
-            spider.driver.get(request.url)
+            # cookies = {'name': 'lianjia_token', 'value': '2.0015d6f6987bb6dc8a047bdfa9ec1edb32', 'domain': '.lianjia.com'}
+            # spider.driver.add_cookie(cookies)
+            # spider.driver.get(request.url)
             time.sleep(2) #等待页面加载
             current_url = spider.driver.current_url
-            resBody = spider.driver.page_source
             while current_url.find('captcha?location=https') != -1:  
                 try:
                     wait = WebDriverWait(spider.driver, 5)#最长等待时长
@@ -128,19 +127,15 @@ class LianjiaHomeDownloaderMiddleware:
                     result = ocr.classification(codeImage, probability=False,png_fix=True)
                     print(f"******************{result}****************")
                     input_element = spider.driver.find_element(By.NAME, "imageCaptchaCode")
-                    # spider.driver.save_screenshot('temp3.png')
                     input_element.clear()
                     input_element.send_keys(result) # 填写验证码
-                    # spider.driver.save_screenshot('result.png')
                     time.sleep(3)
-                    resBody = spider.driver.page_source
-                    # print(driver.page_source)
-                    # spider.driver.save_screenshot('final.png')
+                    current_url = spider.driver.current_url
                 except Exception as e:
                     print(e)
             print(f"************requirst success****************")
             res = HtmlResponse(url=current_url, encoding='utf8', 
-                body=resBody,
+                body=spider.driver.page_source,
                 request=request)
                       
         return res

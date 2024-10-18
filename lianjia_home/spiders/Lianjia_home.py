@@ -10,6 +10,8 @@ from scrapy.loader import ItemLoader
 from selenium import webdriver
 import json
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.remote.remote_connection import LOGGER
+import logging
 
 
 districtDic = {
@@ -31,6 +33,7 @@ class LianjiaHomeSpider(scrapy.Spider):
     allowed_domains = ['nc.lianjia.com']
 
     def __init__(self):
+        chromeDrivePath = "D:\下载\chromedriver-win64\chromedriver.exe"
         myUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
         options = Options()
         options.add_argument('--headless')
@@ -41,8 +44,12 @@ class LianjiaHomeSpider(scrapy.Spider):
         options.add_argument(f'user-agent={myUserAgent}')
         options.add_experimental_option('excludeSwitches', ['enable-automation'])
         options.add_experimental_option('useAutomationExtension', False)
+        LOGGER.setLevel(logging.WARNING)
         try:
-            self.driver = webdriver.Chrome(executable_path='D:\下载\chromedriver-win64\chromedriver.exe', options=options)
+            self.driver = webdriver.Chrome(executable_path=chromeDrivePath, options=options, )
+            self.driver.get("https://nc.lianjia.com/ershoufang/co32/")
+            cookies = {'name': 'lianjia_token', 'value': '2.0015d6f6987bb6dc8a047bdfa9ec1edb32', 'domain': '.lianjia.com'}
+            self.driver.add_cookie(cookies)
         except Exception as e:
             print(e)
         self.use_proxy = settings.USE_PROXY
