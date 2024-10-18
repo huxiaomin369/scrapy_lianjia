@@ -24,6 +24,8 @@ bash initmysql.sh
 ## tips 
 lianjia已有反爬虫机制，需要登录验证，且登录加密，目前只能手动指定cookie中的token才能爬取
 
+[反爬虫测试网站](https://bot.sannysoft.com/)
+
 ```sh
 # chrome 驱动
 https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json
