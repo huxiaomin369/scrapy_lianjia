@@ -36,25 +36,22 @@ def url_to_image(data_uri):
 
 # print(result)
 myUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
-cookies = {'name': 'lianjia_token', 'value': '2.0015d6f6987bb6dc8a047bdfa9ec1edb32'}
+cookies = {'name': 'lianjia_token', 'value': '2.0015d6f6987bb6dc8a047bdfa9ec1edb32', 'domain': '.lianjia.com'}
 
 # 设置无头模式
 options = Options()
 options.add_argument('--headless')
-options.add_argument('--disable-gpu')
+# options.add_argument('--disable-gpu')
 options.add_argument('--no-sandbox')
 options.add_argument('--disable-extensions')
 options.add_argument("disable-blink-features=AutomationControlled")
-options.add_argument(
-    f'user-agent={myUserAgent}')
-options.add_argument(
-    f'user-agent={myUserAgent}')
+options.add_argument(f'user-agent={myUserAgent}')
 options.add_experimental_option('excludeSwitches', ['enable-automation'])
 options.add_experimental_option('useAutomationExtension', False)
 driver = None
 try:
-    
-    driver = webdriver.Chrome(options=options) 
+    driver = webdriver.Chrome(executable_path='D:\下载\chromedriver-win64\chromedriver.exe', options=options)
+    # driver = webdriver.Chrome(options=options) 
     # driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
     #     "source": """
     #         Object.defineProperty(navigator, 'webdriver', {
@@ -64,7 +61,8 @@ try:
     #     })
     driver.get("https://nc.lianjia.com/ershoufang/co32/") #https://nc.lianjia.com/ershoufang/co32/
     driver.add_cookie(cookies)
-    driver.refresh()
+    print(driver.current_url)
+    driver.get("https://nc.lianjia.com/ershoufang/co32/")
     time.sleep(3)
     cookies = driver.get_cookies()
     print("*****************cookies****************")

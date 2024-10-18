@@ -102,24 +102,23 @@ class LianjiaHomeDownloaderMiddleware:
         if spider.name=="Lianjia_home" or spider.name=="lianjia_nc_new": 
             if spider.driver is None :   
                 return None
-            
+
             spider.driver.get(request.url)
-            cookies = {'name': 'lianjia_token', 'value': '2.0015d6f6987bb6dc8a047bdfa9ec1edb32'}
+            cookies = {'name': 'lianjia_token', 'value': '2.0015d6f6987bb6dc8a047bdfa9ec1edb32', 'domain': '.lianjia.com'}
             spider.driver.add_cookie(cookies)
             spider.driver.get(request.url)
-            time.sleep(3) #等待页面加载
+            time.sleep(2) #等待页面加载
             current_url = spider.driver.current_url
-            if current_url.find('captcha?location=https') == -1: 
-                res = HtmlResponse(url=current_url, encoding='utf8', 
-                    body=spider.driver.page_source,
-                    request=request)
-            else:
+            resBody = spider.driver.page_source
+            while current_url.find('captcha?location=https') != -1:  
                 try:
                     wait = WebDriverWait(spider.driver, 5)#最长等待时长
                     buttonElement=wait.until(EC.presence_of_element_located((By.CLASS_NAME, "bk-captcha-btn")))
-                    buttonElement.click()
-                    
-                    print("**********************imageurl********************")
+                    try:
+                        buttonElement.click()
+                    except:
+                        pass
+                    time.sleep(1) #等待验证码刷新
                     # *******************url方式获取原图(base64编码)*********
                     element = spider.driver.find_element(By.NAME, "imageCaptcha")
                     imageUrl = element.get_attribute('src')
@@ -134,13 +133,16 @@ class LianjiaHomeDownloaderMiddleware:
                     input_element.send_keys(result) # 填写验证码
                     # spider.driver.save_screenshot('result.png')
                     time.sleep(3)
+                    resBody = spider.driver.page_source
                     # print(driver.page_source)
                     # spider.driver.save_screenshot('final.png')
-                    res = HtmlResponse(url=request.url, encoding='utf8', 
-                        body=spider.driver.page_source,
-                        request=request)
                 except Exception as e:
                     print(e)
+            print(f"************requirst success****************")
+            res = HtmlResponse(url=current_url, encoding='utf8', 
+                body=resBody,
+                request=request)
+                      
         return res
 
 

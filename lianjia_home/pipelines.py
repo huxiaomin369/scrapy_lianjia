@@ -59,6 +59,8 @@ class FilterPipeline(object):
             for key, value in item.items():
                 if item[key] is not None:
                     item[key] = value.strip()
+            if item['house_id'] == 0:
+                raise DropItem(f'无house_id, 抛弃此项目:{item}')
             # 按挂牌日期过滤
             # start_datetime = datetime.datetime.strptime(item['start_time'], '%Y-%m-%d')
             # if start_datetime < datetime.datetime(2022, 11, 1):
