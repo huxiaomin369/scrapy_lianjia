@@ -3,4 +3,4 @@ psutil
 redis
 pymysql
 fake-useragent
-selenium==4.4.0
+selenium==4.6.0

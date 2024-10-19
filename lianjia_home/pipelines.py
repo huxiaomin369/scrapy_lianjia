@@ -91,7 +91,7 @@ class FilterPipeline(object):
 class MySQLPipeLine(object):
     db_conn = None
     db_cursor = None
-
+    itemNum = 0
     def open_spider(self, spider):
         db_name = spider.settings.get('MYSQL_DB_NAME')
         host = spider.settings.get('MYSQL_HOST')
@@ -130,7 +130,6 @@ class MySQLPipeLine(object):
                     start_time,house_usage,house_property,total_price,unit_price,mortgage_info,url)' \
                 ' values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
             self.db_cursor.execute(sql, values)
-            return item
         elif spider.name == 'lianjia_nc_new':
             values = (item['url'], item['village_name'], item['unit_price'], item['district'], item['region'],
                       item['sale_date'], item['deliver_date'], item['house_usage'], item['house_property'], 
@@ -138,10 +137,14 @@ class MySQLPipeLine(object):
             sql = 'insert into lianjia_nc_new (url, village_name, unit_price, district, region, sale_date, \
                     deliver_date, house_usage, house_property, building_type, developer_name, specials, house_num) \
                         values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
-            self.db_cursor.execute(sql, values)
-            return item
+            self.db_cursor.execute(sql, values)         
         else:
-            return
+            pass
+        self.itemNum = self.itemNum + 1
+        if self.itemNum % 100 == 0:
+            self.db_conn.commit()
+        print(f"***************curNum:{self.itemNum}********************")
+        return item
 
     def close_spider(self, spider):
         self.db_conn.commit()

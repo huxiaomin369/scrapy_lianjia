@@ -2,6 +2,14 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "moduleDebug",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "scrapy",
+            "cwd": "${workspaceFolder}",
+            "args": ["crawl", "Lianjia_home"],
+        },
+        {
             "name": "debugMain",
             "type": "debugpy",
             "request": "launch",
@@ -13,14 +21,14 @@
                 "mhu"
             ],
             "pythonArgs": [
-                "-u",  // 以非缓冲模式运行
+                "-u", // 以非缓冲模式运行
             ],
             "cwd": "${workspaceFolder}",
             "env": {
                 "NODE_ENV": "development",
                 "CUSTOM_USR_NAME": "mhu",
-                "PYTHONPATH":"$PYTHONPATH:${workspaceFolder}"
-            }, 
+                "PYTHONPATH": "$PYTHONPATH:${workspaceFolder}"
+            },
             // "preLaunchTask": "preLaunchAll",
         },
         {
@@ -35,14 +43,14 @@
                 "mhu"
             ],
             "pythonArgs": [
-                "-u",  // 以非缓冲模式运行
+                "-u", // 以非缓冲模式运行
             ],
             "cwd": "${workspaceFolder}",
             "env": {
                 "NODE_ENV": "development",
                 "CUSTOM_USR_NAME": "mhu",
-                "PYTHONPATH":"$PYTHONPATH:${workspaceFolder}"
-            }, 
+                "PYTHONPATH": "$PYTHONPATH:${workspaceFolder}"
+            },
             // "preLaunchTask": "preLaunchAll",
         }
     ]
