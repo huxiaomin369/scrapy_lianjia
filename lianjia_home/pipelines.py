@@ -129,7 +129,11 @@ class MySQLPipeLine(object):
                     total_area,village_name,district,region,fitment,elevator_rate,\
                     start_time,house_usage,house_property,total_price,unit_price,mortgage_info,url)' \
                 ' values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
-            self.db_cursor.execute(sql, values)
+            try:
+                self.db_cursor.execute(sql, values)
+            except Exception as e:
+                print("*****sql error******")
+                print(e)
         elif spider.name == 'lianjia_nc_new':
             values = (item['url'], item['village_name'], item['unit_price'], item['district'], item['region'],
                       item['sale_date'], item['deliver_date'], item['house_usage'], item['house_property'], 
@@ -137,7 +141,11 @@ class MySQLPipeLine(object):
             sql = 'insert into lianjia_nc_new (url, village_name, unit_price, district, region, sale_date, \
                     deliver_date, house_usage, house_property, building_type, developer_name, specials, house_num) \
                         values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
-            self.db_cursor.execute(sql, values)         
+            try:
+                self.db_cursor.execute(sql, values)
+            except Exception as e:
+                print("*****sql error******")
+                print(e)       
         else:
             pass
         self.itemNum = self.itemNum + 1
