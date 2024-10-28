@@ -38,13 +38,20 @@ class LianjiaHomeSpider(scrapy.Spider):
             myUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
             options = Options()
             options.add_argument('--headless')
-            # options.add_argument('--disable-gpu')
+            options.add_argument('--disable-gpu')
             options.add_argument('--no-sandbox')
             options.add_argument('--disable-extensions')
             options.add_argument("disable-blink-features=AutomationControlled")
             options.add_argument(f'user-agent={myUserAgent}')
             options.add_experimental_option('excludeSwitches', ['enable-automation'])
             options.add_experimental_option('useAutomationExtension', False)
+            # 设置禁止加载图片的选项
+            prefs = {
+                "profile.managed_default_content_settings.images": 2,
+                'permissions.default.stylesheet': 2  # 同时禁止CSS加载
+            }
+            options.add_experimental_option("prefs", prefs)
+            options.add_argument('--disable-software-rasterizer')
             LOGGER.setLevel(logging.WARNING)
             try:
                 self.driver = webdriver.Chrome(executable_path=chromeDrivePath, options=options, )

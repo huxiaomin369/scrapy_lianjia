@@ -23,7 +23,7 @@ REDIS_PORT = 6379        #端口
 REDIS_DB_INDEX = 0       #索引
 REDIS_PASSWORD = ""#密码
 
-USE_CHROME=0
+USE_CHROME=1
 
 USE_PROXY = 0 #使用代理1，不使用0
 CRAWL_WITH_DISTRICT = 0 #是否分行政区爬取，分行政区爬取数据全，数据量大

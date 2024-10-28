@@ -26,6 +26,7 @@ response = requests.get(url, headers=headers, verify=False)
 if response.ok:
     print('登录成功!')
     print(response.text)  # 打印服务器的响应内容
+    print(response.url)
     parsed_data = json.loads(response.text)
     token = parsed_data['data']["token"]
     print(token)
