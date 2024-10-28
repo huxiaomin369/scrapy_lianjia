@@ -149,7 +149,7 @@ class MySQLPipeLine(object):
         else:
             pass
         self.itemNum = self.itemNum + 1
-        if self.itemNum % 100 == 0:
+        if self.itemNum % 20 == 0:
             self.db_conn.commit()
         print(f"***************curNum:{self.itemNum}********************")
         return item
