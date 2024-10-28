@@ -14,7 +14,7 @@ services:  # 定义服务列表
       # - host
       - metanet1
     depends_on:
-      - redis
+      # - redis
       - mysql
     command: tail -f /dev/null # 设置容器启动时的命令, tail -f /dev/null这个命令防止容器退出
   metabase:
@@ -44,11 +44,12 @@ services:  # 定义服务列表
   mysql:
     image: gcr.io/ml-pipeline/mysql:8.0.26 
     container_name: "mysql"
-    ports:
-      - "3306:3306"
-    networks:
-      # - host
-      - metanet1
+    network_mode: "host"
+    # ports:
+    #   - "3306:3306"
+    # networks:
+      # - metanet1
+    working_dir: /project
     volumes:
       - "../data/mysqlData/files:/var/lib/mysql-files"
       - "../data/mysqlData/data:/var/lib/mysql"
