@@ -1,4 +1,4 @@
--- 检查数据库是否存在，如果不存在则创建
+DROP DATABASE house;
 CREATE DATABASE IF NOT EXISTS house
 CHARACTER SET utf8mb4
 COLLATE utf8mb4_unicode_ci;

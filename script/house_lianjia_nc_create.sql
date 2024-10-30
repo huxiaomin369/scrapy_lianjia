@@ -39,5 +39,6 @@ CREATE TABLE `lianjia_nc` (
   `total_price` smallint NOT NULL COMMENT '总价',
   `unit_price` MEDIUMINT NOT NULL COMMENT '每平方价',
   `mortgage_info` varchar(20) DEFAULT NULL COMMENT '抵押信息',
+  `url` varchar(127) DEFAULT NULL COMMENT '源地址',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
