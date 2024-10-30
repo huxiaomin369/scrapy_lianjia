@@ -3,6 +3,7 @@ from multiprocessing import  Process
 import os
 import time
 import psutil
+import schedule
 
 def mutiProcessFunc(cmd):
     os.system(cmd)
@@ -22,16 +23,15 @@ def have_process_alive(processList):
         isAlive = isAlive | process.is_alive()
     return isAlive
 
-if __name__ == "__main__":
+def job():
     processArgs = [
                 # "E:\\pythonCode\\DATA_BASE\Redis-x64-5.0.14.1\\redis-server.exe",
                 # "scrapy crawl free_proxy_05",
                 "scrapy crawl Lianjia_home",
-                # "crapy crawl lianjia_nc_new"
+                "scrapy crawl lianjia_nc_new"
                    ]
     # 创建进程列表
     allProcesses = []
-
     for i in range(len(processArgs)):
         p = Process(target=mutiProcessFunc, args=(processArgs[i],))
         allProcesses.append(p)
@@ -48,6 +48,13 @@ if __name__ == "__main__":
     # 等待所有进程完成
     for process in allProcesses:
         process.join()
+
+if __name__ == "__main__":
+    # job()
+    schedule.every().wednesday.at("22:00").do(job)
+    while True:
+        schedule.run_pending()
+        time.sleep(10)
     
 
 

@@ -2,7 +2,7 @@
 #
 # See documentation in:
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
-
+from lianjia_home import settings
 from scrapy import signals
 from scrapy.downloadermiddlewares.useragent import UserAgentMiddleware
 from fake_useragent import UserAgent
@@ -71,6 +71,10 @@ from selenium.common.exceptions import NoSuchElementException,TimeoutException
 from selenium.webdriver.chrome.options import Options
 from PIL import Image
 import ddddocr
+from selenium.webdriver.remote.remote_connection import LOGGER
+import logging
+from selenium.webdriver.chrome.options import Options
+from selenium import webdriver
 
 import base64
 import io
@@ -88,6 +92,34 @@ class LianjiaHomeDownloaderMiddleware:
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the downloader middleware does not modify the
     # passed objects.
+    def __init__(self):
+        if settings.USE_CHROME:
+            chromeDrivePath = "D:\下载\chromedriver-win64\chromedriver.exe"
+            myUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+            options = Options()
+            options.add_argument('--headless')
+            options.add_argument('--disable-gpu')
+            options.add_argument('--no-sandbox')
+            options.add_argument('--disable-extensions')
+            options.add_argument("disable-blink-features=AutomationControlled")
+            options.add_argument(f'user-agent={myUserAgent}')
+            options.add_experimental_option('excludeSwitches', ['enable-automation'])
+            options.add_experimental_option('useAutomationExtension', False)
+            # 设置禁止加载图片的选项
+            prefs = {
+                "profile.managed_default_content_settings.images": 2,
+                'permissions.default.stylesheet': 2  # 同时禁止CSS加载
+            }
+            options.add_experimental_option("prefs", prefs)
+            options.add_argument('--disable-software-rasterizer')
+            LOGGER.setLevel(logging.WARNING)
+            try:
+                self.driver = webdriver.Chrome(executable_path=chromeDrivePath, options=options, )
+                self.driver.get("https://nc.lianjia.com/ershoufang/co32/")
+                cookies = {'name': 'lianjia_token', 'value': '2.0015d6f6987bb6dc8a047bdfa9ec1edb32', 'domain': '.lianjia.com'}
+                self.driver.add_cookie(cookies)
+            except Exception as e:
+                print(e)
 
     @classmethod
     def from_crawler(cls, crawler):
@@ -100,18 +132,17 @@ class LianjiaHomeDownloaderMiddleware:
         # Called for each request that goes through the downloader
         res = None
         if spider.name=="Lianjia_home" or spider.name=="lianjia_nc_new": 
-            if spider.driver is None :   
+            if not settings.USE_CHROME:
                 return None
-
-            spider.driver.get(request.url)
+            self.driver.get(request.url)
             # cookies = {'name': 'lianjia_token', 'value': '2.0015d6f6987bb6dc8a047bdfa9ec1edb32', 'domain': '.lianjia.com'}
-            # spider.driver.add_cookie(cookies)
-            # spider.driver.get(request.url)
+            # self.driver.add_cookie(cookies)
+            # self.driver.get(request.url)
             time.sleep(2) #等待页面加载
-            current_url = spider.driver.current_url
+            current_url = self.driver.current_url
             while current_url.find('captcha?location=https') != -1:  
                 try:
-                    wait = WebDriverWait(spider.driver, 5)#最长等待时长
+                    wait = WebDriverWait(self.driver, 5)#最长等待时长
                     buttonElement=wait.until(EC.presence_of_element_located((By.CLASS_NAME, "bk-captcha-btn")))
                     try:
                         buttonElement.click()
@@ -119,7 +150,7 @@ class LianjiaHomeDownloaderMiddleware:
                         pass
                     time.sleep(1) #等待验证码刷新
                     # *******************url方式获取原图(base64编码)*********
-                    element = spider.driver.find_element(By.NAME, "imageCaptcha")
+                    element = self.driver.find_element(By.NAME, "imageCaptcha")
                     imageUrl = element.get_attribute('src')
                     codeImage = url_to_image(imageUrl)             
                     ocr = ddddocr.DdddOcr(use_gpu=False,show_ad=False,beta=True)
@@ -128,16 +159,16 @@ class LianjiaHomeDownloaderMiddleware:
                     if len(result) != 4 :
                         result = "aaaa" # 验证码识别长度不对则随意填充刷新验证码，防止死循环卡住
                     print(f"******************{result}****************")
-                    input_element = spider.driver.find_element(By.NAME, "imageCaptchaCode")
+                    input_element = self.driver.find_element(By.NAME, "imageCaptchaCode")
                     input_element.clear()
                     input_element.send_keys(result) # 填写验证码
                     time.sleep(3)
-                    current_url = spider.driver.current_url
+                    current_url = self.driver.current_url
                 except Exception as e:
                     print(e)
             print(f"************requirst success****************")
             res = HtmlResponse(url=current_url, encoding='utf8', 
-                body=spider.driver.page_source,
+                body=self.driver.page_source,
                 request=request)
                       
         return res
