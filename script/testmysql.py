@@ -11,7 +11,13 @@ try:
     # 创建游标
     with connection.cursor() as cursor:
         # 执行查询语句
-        sql = "SHOW TABLES;"
+        # sql = "SHOW TABLES;"
+        sql = "DESCRIBE lianjia_nc;"
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        for row in result:
+            print(row)
+        sql = "SELECT COUNT(*) FROM lianjia_nc;"
         cursor.execute(sql)
         result = cursor.fetchall()
         for row in result:
